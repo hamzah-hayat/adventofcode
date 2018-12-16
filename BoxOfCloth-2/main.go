@@ -73,5 +73,27 @@ func CountLettersWhichAppear(numOfTimes int, input []string) int {
 func FindCorrectBoxes(input []string) string {
 	correctLetters := ""
 
+	for _, firstBoxName := range input {
+		for _, secondBoxName := range input {
+			// Compare these two boxnames character by character
+			// If they have one chracter difference, delete the different character then return the letters
+			differences := 0
+			for i, _ := range firstBoxName {
+				if firstBoxName[i] != secondBoxName[i] {
+					differences++
+				}
+			}
+			if differences == 1 {
+				// Found correct boxes, now build string
+				for i, _ := range firstBoxName {
+					if firstBoxName[i] == secondBoxName[i] {
+						correctLetters += string(firstBoxName[i])
+					}
+				}
+				return correctLetters
+			}
+		}
+	}
+
 	return correctLetters
 }
