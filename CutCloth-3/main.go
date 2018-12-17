@@ -57,3 +57,10 @@ func readInput() []claim {
 	}
 	return input
 }
+
+// Find the amount of overlap between all the claims
+func FindOverlap(input []claim) int {
+	overlap := 0
+
+	return overlap
+}
