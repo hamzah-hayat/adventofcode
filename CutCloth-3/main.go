@@ -9,17 +9,18 @@ import (
 )
 
 func main() {
-	PartOne()
-	//PartTwo()
+	//PartOne()
+	PartTwo()
 }
 
 func PartOne() {
 	input := readInput()
-	fmt.Println(input)
+	fmt.Println(FindOverlap(input))
 }
 
 func PartTwo() {
-	//input := readInput()
+	input := readInput()
+	fmt.Println(FindNonOverlapClaim(input))
 }
 
 type claim struct {
@@ -61,6 +62,88 @@ func readInput() []claim {
 // Find the amount of overlap between all the claims
 func FindOverlap(input []claim) int {
 	overlap := 0
+	var claimedCloth [1000][1000]int
+
+	for _, claim := range input {
+		// Claim some cloth
+		for i := 0; i < claim.width; i++ {
+			for j := 0; j < claim.height; j++ {
+				claimedCloth[claim.left+i][claim.top+j]++
+			}
+		}
+	}
+
+	// Now iterate over finished array and find anything which has been claimed more then once
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < 1000; j++ {
+			if claimedCloth[i][j] > 1 {
+				overlap++
+			}
+		}
+	}
 
 	return overlap
+}
+
+// Find the Claim which doesnt overlap with anything else
+func FindNonOverlapClaim(input []claim) string {
+	claimID := ""
+	var claimedCloth [1000][1000]int
+
+	for _, claim := range input {
+		// Claim some cloth
+		for i := 0; i < claim.width; i++ {
+			for j := 0; j < claim.height; j++ {
+				claimedCloth[claim.left+i][claim.top+j]++
+			}
+		}
+	}
+
+	// We will find a 1x1 square that is claimed one time, then use it to find the correct claim
+	targeti := 0
+	targetj := 0
+	found := false
+
+	// Now iterate over finished array and find anything claimed only once
+	for i := 0; i < 1000; i++ {
+		for j := 0; j < 1000; j++ {
+			if claimedCloth[i][j] == 1 {
+				// Find out what claim links to here
+				targeti = i
+				targetj = j
+				found = true
+			}
+			if found {
+				break
+			}
+		}
+		if found {
+			break
+		}
+	}
+
+	found2 := false
+	// Then find the claim that relates to this
+	for _, claim := range input {
+		// Claim some cloth
+		for i := 0; i < claim.width; i++ {
+			for j := 0; j < claim.height; j++ {
+				claimedCloth[claim.left+i][claim.top+j]++
+				if targeti == claim.left+i && targetj == claim.top+j {
+					claimID = strconv.Itoa(claim.id)
+				}
+				if found2 {
+					break
+				}
+			}
+			if found2 {
+				break
+			}
+		}
+		if found2 {
+			break
+		}
+	}
+
+	return claimID
 }
