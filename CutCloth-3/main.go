@@ -99,51 +99,22 @@ func FindNonOverlapClaim(input []claim) string {
 		}
 	}
 
-	// We will find a 1x1 square that is claimed one time, then use it to find the correct claim
-	targeti := 0
-	targetj := 0
-	found := false
-
-	// Now iterate over finished array and find anything claimed only once
-	for i := 0; i < 1000; i++ {
-		for j := 0; j < 1000; j++ {
-			if claimedCloth[i][j] == 1 {
-				// Find out what claim links to here
-				targeti = i
-				targetj = j
-				found = true
-			}
-			if found {
-				break
-			}
-		}
-		if found {
-			break
-		}
-	}
-
-	found2 := false
-	// Then find the claim that relates to this
+	// Find a claim that doesnt overlap
 	for _, claim := range input {
-		// Claim some cloth
+		noOverlap := true
+
+		// Check the claim
 		for i := 0; i < claim.width; i++ {
 			for j := 0; j < claim.height; j++ {
-				claimedCloth[claim.left+i][claim.top+j]++
-				if targeti == claim.left+i && targetj == claim.top+j {
-					claimID = strconv.Itoa(claim.id)
+				if claimedCloth[claim.left+i][claim.top+j] > 1 {
+					noOverlap = false
 				}
-				if found2 {
-					break
-				}
-			}
-			if found2 {
-				break
 			}
 		}
-		if found2 {
-			break
+
+		if noOverlap {
+			claimID = strconv.Itoa(claim.id)
 		}
 	}
-
 	return claimID
 }
