@@ -2,16 +2,26 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"sort"
 )
 
+type shift struct {
+	guardID string // The ID of the guard
+	sleep   []bool // For each minute of the shift, was the guard asleep or not
+}
+
 func main() {
-	//PartOne()
+	PartOne()
 	//PartTwo()
 }
 
 func PartOne() {
-	//input := readInput()
+	input := readInput()
+	for _, line := range input {
+		fmt.Println(line)
+	}
 
 }
 
@@ -21,7 +31,7 @@ func PartTwo() {
 
 // Read data from input.txt
 // Load it into string array
-func readInput() []string {
+func readInput() []shift {
 
 	var input []string
 
@@ -34,5 +44,12 @@ func readInput() []string {
 			input = append(input, line)
 		}
 	}
-	return input
+
+	// Now have all the input, sort it by date/time
+	sort.Strings(input)
+
+	// Now we have to build a "shift" for each day
+	var shifts []shift
+
+	return shifts
 }
