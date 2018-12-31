@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 )
 
 type shift struct {
@@ -50,6 +51,29 @@ func readInput() []shift {
 
 	// Now we have to build a "shift" for each day
 	var shifts []shift
+	i := 0
+	for i < len(input) {
+		newShift, nexti := BuildShift(i, input)
+		i = nexti
+		shifts = append(shifts, newShift)
+	}
 
 	return shifts
+}
+
+func BuildShift(i int, input []string) (shift, int) {
+	// Build a shift using the input
+	// Return the new shift and the next i
+	var newShift shift
+
+	newShift.guardID = strings.TrimLeft(strings.Fields(input[i])[3], "#")
+	i++
+
+	for {
+		// We always assume we start with a new Guard Line
+
+		break
+	}
+
+	return newShift, i
 }
