@@ -39,7 +39,7 @@ func PartOne() {
 	for guardID, sleepSum := range guardSleepSum {
 		if sleepSum > highestSum {
 			highestGuard = guardID
-			sleepSum = highestSum
+			highestSum = sleepSum
 		}
 	}
 
@@ -57,8 +57,6 @@ func PartOne() {
 		}
 	}
 
-	fmt.Println(guardMinuteSleepSum)
-
 	highestMinuteSum := 0
 	highestMinute := 0
 	for minute, sleepMinSum := range guardMinuteSleepSum {
@@ -70,6 +68,10 @@ func PartOne() {
 
 	highestMinuteStr := strconv.Itoa(highestMinute)
 	fmt.Println("They were sleepiest during minute " + highestMinuteStr)
+
+	highestGuardStr, _ := strconv.Atoi(highestGuard)
+	checksum := highestMinute * highestGuardStr
+	fmt.Println("Checksum is " + strconv.Itoa(checksum))
 
 }
 
@@ -134,7 +136,7 @@ func BuildShift(i int, input []string) (shift, int) {
 			newTimeStr := strings.Fields(input[i])[1]
 			newTimeVal, _ := strconv.Atoi(strings.TrimPrefix(strings.TrimSuffix(newTimeStr, "]"), "00:"))
 			for j := time; j < newTimeVal; j++ {
-				newShift.sleep[j] = true
+				newShift.sleep[j] = false
 			}
 			time = newTimeVal
 		}
@@ -142,7 +144,7 @@ func BuildShift(i int, input []string) (shift, int) {
 			newTimeStr := strings.Fields(input[i])[1]
 			newTimeVal, _ := strconv.Atoi(strings.TrimPrefix(strings.TrimSuffix(newTimeStr, "]"), "00:"))
 			for j := time; j < newTimeVal; j++ {
-				newShift.sleep[j] = false
+				newShift.sleep[j] = true
 			}
 			time = newTimeVal
 		}
