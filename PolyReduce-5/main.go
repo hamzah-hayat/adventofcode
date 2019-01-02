@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
+	"sync"
 	"unicode"
 )
 
 func main() {
-	//PartOne()
-	PartTwo()
+	PartOne()
+	//PartTwo()
 }
 
 func PartOne() {
@@ -21,7 +23,46 @@ func PartOne() {
 }
 
 func PartTwo() {
-	//input := readInput()
+	input := readInput()
+	allLetters := []string{"a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "y", "x", "z"}
+
+	// Need to remove a letter then polyreduce the file, then store the length of the file with the letter
+	answersList := make(map[string]int)
+
+	var wg sync.WaitGroup
+	// Only run 5 threads at a time
+	goroutineChannel := make(chan struct{}, 5)
+
+	for _, letter := range allLetters {
+		wg.Add(1)
+		// First, take input and remove all letters of that type
+		newInput := strings.Replace(input, strings.ToUpper(letter), "", -1)
+		newInput = strings.Replace(newInput, strings.ToLower(letter), "", -1)
+		goroutineChannel <- struct{}{}
+		go func() {
+			defer wg.Done()
+			reduced := PolyReduction(newInput)
+			thisLetter := letter
+			answersList[thisLetter] = len(reduced)
+			fmt.Println("Finished for letter " + thisLetter + " final value was " + strconv.Itoa(len(reduced)))
+			<-goroutineChannel
+		}()
+	}
+	fmt.Println(answersList)
+
+	wg.Wait()
+
+	lowestValue := 50000
+	lowestLetter := ""
+	for letter, value := range answersList {
+		if value < lowestValue {
+			lowestValue = value
+			lowestLetter = letter
+		}
+	}
+
+	fmt.Println("Removing the letter " + lowestLetter + " reduces the polymer the most")
+
 }
 
 // Reduce the polymerstring
@@ -33,7 +74,7 @@ func PolyReduction(polymerString string) string {
 	for foundReduction {
 		fmt.Println("Current string length is " + strconv.Itoa(len(newPolymer)))
 		foundReduction = false
-		for index := range newPolymer {
+		for index := 0; index < len(newPolymer); index++ {
 			// First check if we are out of range
 			if index+1 >= len(newPolymer) {
 				break
