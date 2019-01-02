@@ -4,18 +4,20 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"unicode"
 )
 
 func main() {
-	PartOne()
-	//PartTwo()
+	//PartOne()
+	PartTwo()
 }
 
 func PartOne() {
-	//input := readInput()
-	fmt.Println("New Poly is:")
-	fmt.Println(PolyReduction("aAbBCd"))
+	input := readInput()
+	reduced := PolyReduction(input)
+	fmt.Printf("The Length of the new Polymer is %v\n", len(reduced))
+
 }
 
 func PartTwo() {
@@ -29,28 +31,40 @@ func PolyReduction(polymerString string) string {
 
 	foundReduction := true
 	for foundReduction {
+		fmt.Println("Current string length is " + strconv.Itoa(len(newPolymer)))
 		foundReduction = false
-		for index, character := range newPolymer {
+		for index := range newPolymer {
 			// First check if we are out of range
-			if index+1 > len(newPolymer) {
+			if index+1 >= len(newPolymer) {
 				break
 			}
+			currentChar := []rune(newPolymer)[index]
+			nextChar := []rune(newPolymer)[index+1]
+			//fmt.Println("Current Char is " + string(currentChar) + " and next char is " + string(nextChar))
 
-			if unicode.IsLower(character) {
-				if unicode.IsUpper([]rune(newPolymer)[index+1]) && unicode.ToUpper(character) == unicode.ToUpper([]rune(newPolymer)[index+1]) {
+			if unicode.IsLower(currentChar) {
+				if unicode.IsUpper(nextChar) && unicode.ToUpper(currentChar) == unicode.ToUpper(nextChar) {
 					// Reduce these two
-					newPolymer = string([]rune(newPolymer)[:index-1]) + string([]rune(newPolymer)[index+1:])
+					if index == 0 {
+						newPolymer = string([]rune(newPolymer)[index+2:])
+					} else {
+						newPolymer = string([]rune(newPolymer)[:index]) + string([]rune(newPolymer)[index+2:])
+					}
 					foundReduction = true
-					break
+					continue
 				}
 			}
 
-			if unicode.IsUpper(character) {
-				if unicode.IsLower([]rune(newPolymer)[index+1]) && unicode.ToUpper(character) == unicode.ToUpper([]rune(newPolymer)[index+1]) {
+			if unicode.IsUpper(currentChar) {
+				if unicode.IsLower(nextChar) && unicode.ToUpper(currentChar) == unicode.ToUpper(nextChar) {
 					// Reduce these two
-					newPolymer = string([]rune(newPolymer)[:index-1]) + string([]rune(newPolymer)[index+1:])
+					if index == 0 {
+						newPolymer = string([]rune(newPolymer)[index+2:])
+					} else {
+						newPolymer = string([]rune(newPolymer)[:index]) + string([]rune(newPolymer)[index+2:])
+					}
 					foundReduction = true
-					break
+					continue
 				}
 			}
 
