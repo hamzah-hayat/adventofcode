@@ -15,8 +15,8 @@ type shift struct {
 }
 
 func main() {
-	PartOne()
-	//PartTwo()
+	//PartOne()
+	PartTwo()
 }
 
 func PartOne() {
@@ -76,7 +76,88 @@ func PartOne() {
 }
 
 func PartTwo() {
-	//input := readInput()
+	shifts := readInput()
+
+	// Find the person who had the sleepiest minute
+	// For each person, find their sleepiest minute and add to a map
+	sleepiestMinute := make(map[string]int)
+
+	var guardIDs []string
+
+	// Find all Guard IDs
+	for _, shift := range shifts {
+		found := false
+		for _, guardID := range guardIDs {
+			if shift.guardID == guardID {
+				found = true
+				break
+			}
+		}
+		if !found {
+			guardIDs = append(guardIDs, shift.guardID)
+		}
+	}
+
+	//fmt.Println(guardIDs)
+
+	guardSleepSumList := make(map[string][]int)
+	for _, guardID := range guardIDs {
+		//Find the sleepiest minute for each Guard
+		guardMinuteSleepSum := make([]int, 60)
+		for _, shift := range shifts {
+			if shift.guardID == guardID {
+				for min, val := range shift.sleep {
+					if val {
+						guardMinuteSleepSum[min]++
+					}
+				}
+			}
+		}
+		guardSleepSumList[guardID] = guardMinuteSleepSum
+
+		// Find their sleepiest minute and add the value to our sleepiestMinute map
+		highestSleepValue := 0
+		for _, sleepValue := range guardMinuteSleepSum {
+			if sleepValue > highestSleepValue {
+				highestSleepValue = sleepValue
+			}
+		}
+		sleepiestMinute[guardID] = highestSleepValue
+	}
+
+	fmt.Println(sleepiestMinute)
+
+	// Now find the sleepiest minute guard
+	highestSleepMinuteValue := 0
+	highestSleepGuard := ""
+	for guardID, sleepValue := range sleepiestMinute {
+		if sleepValue > highestSleepMinuteValue {
+			highestSleepGuard = guardID
+			highestSleepMinuteValue = sleepValue
+		}
+	}
+
+	highestSleepGuardID, _ := strconv.Atoi(highestSleepGuard)
+
+	highestSleepMinute := 0
+	// Now that we know which guard has the sleepiest minute, we should find out what minute they were the sleepiest on
+	for guardID, sleepValueList := range guardSleepSumList {
+		if guardID == highestSleepGuard {
+			highestSleepValue := 0
+			for minute, sleepValue := range sleepValueList {
+				if sleepValue > highestSleepValue {
+					highestSleepValue = sleepValue
+					highestSleepMinute = minute
+				}
+			}
+		}
+
+	}
+
+	fmt.Println("The highest guard is " + highestSleepGuard)
+	fmt.Println("The highest slept minute is " + strconv.Itoa(highestSleepMinute))
+	fmt.Printf("The checksum is %v\n", highestSleepGuardID*highestSleepMinute)
+
 }
 
 // Read data from input.txt
