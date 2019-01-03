@@ -43,8 +43,50 @@ func PartTwo() {
 
 func FindLargestArea(points []Point) int {
 	largestArea := 0
+	// First find out the area we are dealing with, dont want to consider any points that have infinite area
+	// Figure out max X and Y, then do closest neighbours on all edge points, and remove the points that are associated with them
+	xmax := FindMax(1, points)
+	ymax := FindMax(2, points)
+
+	edgePoints := make([]Point, 0)
+	for i := 0; i <= xmax; i++ {
+		for j := 0; j <= ymax; j++ {
+			if i == 0 || i == xmax {
+				//Add this point to check points list
+				edgePoints = append(edgePoints, Point{i, j})
+			} else if j == 0 || j == ymax {
+				//Add this point to check points list
+				edgePoints = append(edgePoints, Point{i, j})
+			}
+		}
+	}
+	fmt.Println(edgePoints)
 
 	return largestArea
+}
+
+// FindMax
+func FindMax(field int, points []Point) int {
+
+	highest := 0
+
+	switch field {
+	case 1:
+		for _, point := range points {
+			if point.x > highest {
+				highest = point.x
+			}
+		}
+	case 2:
+		for _, point := range points {
+			if point.y > highest {
+				highest = point.y
+			}
+		}
+	}
+
+	return highest
+
 }
 
 // Find out which is the closest neighbour to the gridpoint
