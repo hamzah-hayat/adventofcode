@@ -43,6 +43,26 @@ func PartTwo() {
 
 func FindLargestArea(points []Point) int {
 	largestArea := 0
+	checkPoints := FindInfinitePoints(points)
+	// Find number of closest neighbours for point
+	sizeMap := make(map[Point]int)
+
+	for _, point := range checkPoints {
+		areaSize := FindNumClosestNeighbours(point, points)
+		sizeMap[point] = areaSize
+		if areaSize > largestArea {
+			largestArea = areaSize
+		}
+	}
+	fmt.Println(sizeMap)
+
+	return largestArea
+}
+
+// Remove any points that have an "infinite area", check if they are closest to one of the edge points of the grid
+func FindInfinitePoints(points []Point) []Point {
+	checkPoints := make([]Point, len(points))
+	copy(checkPoints, points)
 	// First find out the area we are dealing with, dont want to consider any points that have infinite area
 	// Figure out max X and Y, then do closest neighbours on all edge points, and remove the points that are associated with them
 	xmax := FindMax(1, points)
@@ -60,12 +80,22 @@ func FindLargestArea(points []Point) int {
 			}
 		}
 	}
-	fmt.Println(edgePoints)
 
-	return largestArea
+	// Now that we have all the edge points
+	// Find the list of nearest neighbours for each of those points, then remove them
+	for _, point := range edgePoints {
+		closest := FindClosestNeighbour(point, points)
+		// Remove this from our checkPoints list
+		for i, checkPoint := range checkPoints {
+			if checkPoint == closest {
+				checkPoints = append(checkPoints[:i], checkPoints[i+1:]...)
+			}
+		}
+	}
+	return checkPoints
 }
 
-// FindMax
+// FindMax for x and y
 func FindMax(field int, points []Point) int {
 
 	highest := 0
@@ -89,12 +119,30 @@ func FindMax(field int, points []Point) int {
 
 }
 
+// Find number of Closest neighbours for a point
+func FindNumClosestNeighbours(neighbour Point, points []Point) int {
+	xmax := FindMax(1, points)
+	ymax := FindMax(2, points)
+	areaSize := 0
+
+	for i := 0; i < xmax; i++ {
+		for j := 0; j < ymax; j++ {
+			if (FindClosestNeighbour(Point{i, j}, points) == neighbour) {
+				areaSize++
+			}
+		}
+
+	}
+
+	return areaSize
+}
+
 // Find out which is the closest neighbour to the gridpoint
 func FindClosestNeighbour(gridPoint Point, neighbours []Point) Point {
 	var closestPoint Point
-	closestPoint = Point{-1, -1}
+	closestPoint = neighbours[0]
 
-	for _, point := range neighbours {
+	for _, point := range neighbours[1:] {
 		delta := ManhattenDistance(point, gridPoint) - ManhattenDistance(closestPoint, gridPoint)
 		if delta < 0 {
 			closestPoint = point
