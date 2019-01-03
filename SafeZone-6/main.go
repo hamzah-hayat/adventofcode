@@ -48,13 +48,38 @@ func FindLargestArea(points []Point) int {
 }
 
 // Find out which is the closest neighbour to the gridpoint
-func FindClosestNeighbour(gridPoint Point, neighbours []Point) {
+func FindClosestNeighbour(gridPoint Point, neighbours []Point) Point {
+	var closestPoint Point
+	closestPoint = Point{-1, -1}
 
+	for _, point := range neighbours {
+		delta := ManhattenDistance(point, gridPoint) - ManhattenDistance(closestPoint, gridPoint)
+		if delta < 0 {
+			closestPoint = point
+		} else if delta == 0 {
+			// This Point is considered to be not close to any point as two points are
+			// Equal distance away
+			return Point{-1, -1}
+		}
+	}
+
+	return closestPoint
 }
 
 // Figure out the Manhatten Distance between two points
 func ManhattenDistance(firstPoint Point, secondPoint Point) int {
+	x := abs(firstPoint.x - secondPoint.x)
+	y := abs(firstPoint.y - secondPoint.y)
+	return x + y
+}
 
+// Absoulute value of Int
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	} else {
+		return x
+	}
 }
 
 // Read data from input.txt
