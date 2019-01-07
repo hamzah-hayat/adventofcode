@@ -71,10 +71,7 @@ func FindInfinitePoints(points []Point) []Point {
 	edgePoints := make([]Point, 0)
 	for i := 0; i <= xmax; i++ {
 		for j := 0; j <= ymax; j++ {
-			if i == 0 || i == xmax {
-				//Add this point to check points list
-				edgePoints = append(edgePoints, Point{i, j})
-			} else if j == 0 || j == ymax {
+			if i == 0 || j == 0 || i == xmax || j == ymax {
 				//Add this point to check points list
 				edgePoints = append(edgePoints, Point{i, j})
 			}
@@ -139,18 +136,30 @@ func FindNumClosestNeighbours(neighbour Point, points []Point) int {
 
 // Find out which is the closest neighbour to the gridpoint
 func FindClosestNeighbour(gridPoint Point, neighbours []Point) Point {
-	var closestPoint Point
-	closestPoint = neighbours[0]
 
-	for _, point := range neighbours[1:] {
-		delta := ManhattenDistance(point, gridPoint) - ManhattenDistance(closestPoint, gridPoint)
-		if delta < 0 {
+	closestPoint := neighbours[0]
+	closestDelta := ManhattenDistance(closestPoint, gridPoint)
+
+	var deltaList []int
+
+	for _, point := range neighbours {
+		delta := ManhattenDistance(point, gridPoint)
+		if delta < closestDelta {
 			closestPoint = point
-		} else if delta == 0 {
-			// This Point is considered to be not close to any point as two points are
-			// Equal distance away
-			return Point{-1, -1}
+			closestDelta = delta
 		}
+		deltaList = append(deltaList, delta)
+	}
+
+	// Only check if we have two of the closest distances already
+	found := 0
+	for deltaL := range deltaList {
+		if closestDelta == deltaL {
+			found++
+		}
+	}
+	if found > 1 {
+		return Point{-1, -1}
 	}
 
 	return closestPoint
