@@ -26,11 +26,36 @@ func main() {
 
 func PartOne() {
 	input := readInput()
-	fmt.Println(input)
+
+	floor := 0
+	for _, move := range input {
+		if move == '(' {
+			floor++
+		}
+		if move == ')' {
+			floor--
+		}
+	}
+	fmt.Println("The final floor is", floor)
+
 }
 
 func PartTwo() {
-	//input := readInput()
+	input := readInput()
+
+	floor := 0
+	for turn, move := range input {
+		if move == '(' {
+			floor++
+		}
+		if move == ')' {
+			floor--
+		}
+		if floor == -1 {
+			fmt.Println("Santa went into the basement on turn", turn+1)
+			break
+		}
+	}
 }
 
 // Read data from input.txt
