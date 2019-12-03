@@ -195,7 +195,9 @@ func moveGridCountingSteps(moveDir string, moveDist int, grid map[point]int, cur
 		currentPoint.x += xMove
 		currentPoint.y += yMove
 
-		grid[*currentPoint] = *totalSteps
+		if grid[*currentPoint] == 0 {
+			grid[*currentPoint] = *totalSteps
+		}
 	}
 }
 
