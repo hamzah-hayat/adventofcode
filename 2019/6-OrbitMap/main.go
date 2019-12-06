@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -28,44 +28,9 @@ func main() {
 func PartOne() {
 	input := readInput()
 
-	var orbitTarget []string
-	var orbitObject []string
+	root := BuildTree(input)
 
-	for _, orbit := range input {
-		// Split string again
-		orbitItems := strings.Split(orbit, ")")
-
-		// First find root item
-		orbitTarget = append(orbitTarget, orbitItems[0])
-		orbitObject = append(orbitObject, orbitItems[1])
-	}
-
-	// Root node is COM
-
-	nodesToCheck := []*Tree{}
-	root := Tree{name: "COM", orbits: 0}
-	nodesToCheck = append(nodesToCheck, &root)
-
-	for len(nodesToCheck) > 0 {
-
-		for i, orbitT := range orbitTarget {
-			if orbitT == nodesToCheck[0].name {
-				newTree := Tree{name: orbitObject[i], orbits: nodesToCheck[0].orbits + 1}
-				nodesToCheck = append(nodesToCheck, &newTree)
-				nodesToCheck[0].children = append(nodesToCheck[0].children, &newTree)
-			}
-		}
-
-		// now remove first node from nodesToCheck
-
-		// Remove the element at index i from a.
-		copy(nodesToCheck[0:], nodesToCheck[1:])          // Shift a[i+1:] left one index.
-		nodesToCheck[len(nodesToCheck)-1] = &Tree{}       // Erase last element (write zero value).
-		nodesToCheck = nodesToCheck[:len(nodesToCheck)-1] // Truncate slice.
-
-	}
-
-	fmt.Println("The number of orbits is ", Walk(&root))
+	fmt.Println("The number of orbits is", Walk(&root))
 
 }
 
@@ -120,7 +85,6 @@ func PartTwo() {
 			break
 		}
 	}
-	fmt.Println(currentNode)
 	s, _ := FindDistance(&currentNode, "SAN")
 	y, _ := FindDistance(&currentNode, "YOU")
 	fmt.Println("Distance to Santa is", s+y)
