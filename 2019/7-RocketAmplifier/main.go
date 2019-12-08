@@ -4,8 +4,11 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"github.com/hamzah-hayat/adventofcode/intcode"
 	"os"
+	"strconv"
+	"strings"
+
+	"github.com/hamzah-hayat/adventofcode/intcode"
 )
 
 func main() {
@@ -26,127 +29,116 @@ func main() {
 }
 
 func partOne() {
-	//input := readInput()
+	input := readInput()
 
-	program := []int{3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0}
-	//highest := RunRocketAmplifiers(program)
+	programStr := strings.Split(input[0], ",")
+	var program []int
+
+	for _, s := range programStr {
+		i, _ := strconv.Atoi(s)
+		program = append(program, i)
+	}
+
+	// Can only use each signal ONCE
+	signals := []int{0, 1, 2, 3, 4}
+
+	highest := RunRocketAmplifiers(program, signals)
+
+	fmt.Println("Highest output is", highest)
+
+}
+
+func partTwo() {
+	input := readInput()
+
+	programStr := strings.Split(input[0], ",")
+	var program []int
+
+	for _, s := range programStr {
+		i, _ := strconv.Atoi(s)
+		program = append(program, i)
+	}
+
+	// Can only use each signal ONCE
+	signals := []int{5, 6, 7, 8, 9}
+
+	highest := RunRocketAmplifiers(program, signals)
+
+	fmt.Println("Highest output is", highest)
+}
+
+//RunRocketAmplifiers takes a program, runs it through 5 different amplifiers, then outputs the highest result
+func RunRocketAmplifiers(program []int, signals []int) int {
+	highestResult := 0
+
+	Perm(signals, func(a []int) {
+
+		// For each permuation of the signals, run the amplifiers and get the highest result
+		out := runRocketsWithSignals(program, a)
+
+		if out > highestResult {
+			highestResult = out
+		}
+	})
+
+	return highestResult
+}
+
+func runRocketsWithSignals(program []int, signalSet []int) int {
 
 	// First channel is for input
 	input := make(chan int)
 	// Second channel is for output
 	output := make(chan int)
 
-	// Run the five go progams
-	// check the output
 	go intcode.RunIntCodeProgram(program, input, output)
-	input <- 4
+	input <- signalSet[0]
 	input <- 0
 
 	out := <-output
 
 	go intcode.RunIntCodeProgram(program, input, output)
-	input <- 4
+	input <- signalSet[1]
 	input <- out
 
 	out = <-output
 
 	go intcode.RunIntCodeProgram(program, input, output)
-	input <- 4
+	input <- signalSet[2]
 	input <- out
 
 	out = <-output
 
 	go intcode.RunIntCodeProgram(program, input, output)
-	input <- 4
+	input <- signalSet[3]
 	input <- out
 
 	out = <-output
 
 	go intcode.RunIntCodeProgram(program, input, output)
-	input <- 4
+	input <- signalSet[4]
 	input <- out
 
-	out = <-output
-
-	fmt.Println("Highest output is", out)
-
+	return <-output
 }
 
-// func partOne() {
-// 	//input := readInput()
-
-// 	program := []int{3, 15, 3, 16, 1002, 16, 10, 16, 1, 16, 15, 15, 4, 15, 99, 0, 0}
-// 	highest := RunRocketAmplifiers(program)
-
-// 	fmt.Println("Highest output is", highest)
-
-// }
-
-func partTwo() {
-	//input := readInput()
+// Perm calls f with each permutation of a.
+func Perm(a []int, f func([]int)) {
+	perm(a, f, 0)
 }
 
-//RunRocketAmplifiers takes a program, runs it through 5 different amplifiers, then outputs the highest result
-func RunRocketAmplifiers(program []int) int {
-	highestResult := 0
-
-	// First channel is for input
-	input := make(chan int)
-	// Second channel is for output
-	output := make(chan int)
-
-	// Run a nested for loop so that we can run each phase setting
-	// Then run the program and check the result
-	// find the highest result and return it
-
-	for a := 0; a < 5; a++ {
-		for b := 0; b < 5; b++ {
-			for c := 0; c < 5; c++ {
-				for d := 0; d < 5; d++ {
-					for e := 0; e < 5; e++ {
-
-						// Run the five go progams
-						// check the output
-						go intcode.RunIntCodeProgram(program, input, output)
-						input <- a
-						input <- 0
-
-						out := <-output
-
-						go intcode.RunIntCodeProgram(program, input, output)
-						input <- b
-						input <- out
-
-						out = <-output
-
-						go intcode.RunIntCodeProgram(program, input, output)
-						input <- c
-						input <- out
-
-						out = <-output
-
-						go intcode.RunIntCodeProgram(program, input, output)
-						input <- d
-						input <- out
-
-						out = <-output
-
-						go intcode.RunIntCodeProgram(program, input, output)
-						input <- e
-						input <- out
-
-						out = <-output
-
-						if out > highestResult {
-							highestResult = out
-						}
-					}
-				}
-			}
-		}
+// Permute the values at index i to len(a)-1.
+func perm(a []int, f func([]int), i int) {
+	if i > len(a) {
+		f(a)
+		return
 	}
-
-	return highestResult
+	perm(a, f, i+1)
+	for j := i + 1; j < len(a); j++ {
+		a[i], a[j] = a[j], a[i]
+		perm(a, f, i+1)
+		a[i], a[j] = a[j], a[i]
+	}
 }
 
 // Read data from input.txt
