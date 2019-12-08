@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -125,7 +125,86 @@ func getLayer(pixels map[pixel]int, layer int) map[pixel]int {
 }
 
 func partTwo() {
-	//input := readInput()
+	input := stringInputToInt(readInput())
+
+	width := 25
+	height := 6
+
+	pixels, maxLayers := buildPixelMap(input, height, width)
+
+	// Now that we have the pixel grid
+	// Layer all pixels over each other to find the "image layer"
+
+	imageLayer := buildImageLayer(pixels, width, height, maxLayers)
+
+	fmt.Print(printLayer(imageLayer, width, height))
+
+}
+
+func buildImageLayer(pixels map[pixel]int, width int, height int, maxLayers int) map[pixel]int {
+
+	mergedLayer := make(map[pixel]int)
+
+	for h := 0; h < height; h++ {
+		for w := 0; w < width; w++ {
+
+			mergedLayers := getAllPixelsFromAllLayersForPoint(pixels, w, h, maxLayers)
+
+			// Find first visible pixel
+			for _, value := range mergedLayers {
+				if value == 2 {
+					continue
+				} else if value == 1 {
+					mergedLayer[pixel{x: w, y: h, layer: 0}] = 1
+					break
+				} else if value == 0 {
+					mergedLayer[pixel{x: w, y: h, layer: 0}] = 0
+					break
+				}
+			}
+		}
+	}
+
+	fmt.Println(len(mergedLayer))
+
+	return mergedLayer
+
+}
+
+func getAllPixelsFromAllLayersForPoint(pixels map[pixel]int, width int, height int, maxLayers int) []int {
+
+	var allPixels []int
+
+	for i := 0; i < maxLayers; i++ {
+		allPixels = append(allPixels, pixels[pixel{x: width, y: height, layer: i}])
+	}
+
+	return allPixels
+}
+
+// Print out this image layer using unicode boxes
+func printLayer(pixels map[pixel]int, width int, height int) string {
+
+	image := ""
+
+	for h := 0; h < height; h++ {
+		for w := 0; w < width; w++ {
+			switch pixels[pixel{x: w, y: h, layer: 0}] {
+			case 0:
+				image += "\u25A0" // black
+				break
+			case 1:
+				image += "\u25A1" // white
+				break
+			case 2:
+				image += " " // transparent
+				break
+			}
+		}
+		image += "\n"
+	}
+
+	return image
 }
 
 type pixel struct {
