@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"github.com/hamzah-hayat/adventofcode/intcode"
 	"os"
 )
 
@@ -37,31 +38,31 @@ func partOne() {
 
 	// Run the five go progams
 	// check the output
-	go runIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output)
 	input <- 4
 	input <- 0
 
 	out := <-output
 
-	go runIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output)
 	input <- 4
 	input <- out
 
 	out = <-output
 
-	go runIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output)
 	input <- 4
 	input <- out
 
 	out = <-output
 
-	go runIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output)
 	input <- 4
 	input <- out
 
 	out = <-output
 
-	go runIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output)
 	input <- 4
 	input <- out
 
@@ -106,31 +107,31 @@ func RunRocketAmplifiers(program []int) int {
 
 						// Run the five go progams
 						// check the output
-						go runIntCodeProgram(program, input, output)
+						go intcode.RunIntCodeProgram(program, input, output)
 						input <- a
 						input <- 0
 
 						out := <-output
 
-						go runIntCodeProgram(program, input, output)
+						go intcode.RunIntCodeProgram(program, input, output)
 						input <- b
 						input <- out
 
 						out = <-output
 
-						go runIntCodeProgram(program, input, output)
+						go intcode.RunIntCodeProgram(program, input, output)
 						input <- c
 						input <- out
 
 						out = <-output
 
-						go runIntCodeProgram(program, input, output)
+						go intcode.RunIntCodeProgram(program, input, output)
 						input <- d
 						input <- out
 
 						out = <-output
 
-						go runIntCodeProgram(program, input, output)
+						go intcode.RunIntCodeProgram(program, input, output)
 						input <- e
 						input <- out
 
