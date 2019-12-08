@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -62,7 +62,7 @@ func partTwo() {
 	// Can only use each signal ONCE
 	signals := []int{5, 6, 7, 8, 9}
 
-	highest := RunRocketAmplifiers(program, signals)
+	highest := RunRocketAmplifiersLoop(program, signals)
 
 	fmt.Println("Highest output is", highest)
 }
@@ -120,6 +120,60 @@ func runRocketsWithSignals(program []int, signalSet []int) int {
 	input <- out
 
 	return <-output
+}
+
+//RunRocketAmplifiers takes a program, runs it through 5 different amplifiers, then outputs the highest result
+func RunRocketAmplifiersLoop(program []int, signals []int) int {
+	highestResult := 0
+
+	Perm(signals, func(a []int) {
+
+		// For each permuation of the signals, run the amplifiers and get the highest result
+		out := runRocketsWithSignalsLooped(program, a)
+
+		if out > highestResult {
+			highestResult = out
+		}
+	})
+
+	return highestResult
+}
+
+func runRocketsWithSignalsLooped(program []int, signalSet []int) int {
+
+	// Input + Output channels
+	achan := make(chan int)
+	bchan := make(chan int)
+	cchan := make(chan int)
+	dchan := make(chan int)
+	echan := make(chan int, 1) // buffer this so that we dont block on the final result
+
+	// make a channel to wait for all goroutines to finish
+	t := make(chan bool)
+
+	go intcode.RunIntCodeProgramWaitForTermination(program, echan, achan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, achan, bchan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, bchan, cchan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, cchan, dchan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, dchan, echan, t)
+
+	// Initial pass
+	// send signals first
+	echan <- signalSet[0]
+	achan <- signalSet[1]
+	bchan <- signalSet[2]
+	cchan <- signalSet[3]
+	dchan <- signalSet[4]
+
+	echan <- 0
+
+	// wait for programs to stop
+	for i := 0; i < 5; i++ {
+		<-t
+	}
+
+	return <-echan
+
 }
 
 // Perm calls f with each permutation of a.

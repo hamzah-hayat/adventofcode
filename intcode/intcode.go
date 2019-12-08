@@ -93,6 +93,12 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 	}
 }
 
+// RunIntCodeProgramWaitForTermination runs an intcode program then sends a true signal to the t channel
+func RunIntCodeProgramWaitForTermination(program []int, input chan int, output chan int, t chan bool) {
+	RunIntCodeProgram(program, input, output)
+	t <- true
+}
+
 // ReadOpCode TODO: There has to be a better way to do this
 func readOpCode(opCodeFull int) (int, [3]int) {
 
