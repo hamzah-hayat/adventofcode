@@ -1,11 +1,10 @@
-package rocketamplifier
+package main
 
 import (
 	"bufio"
 	"flag"
 	"fmt"
 	"os"
-	"github.com/hamzah-hayat/adventofcode/intcode"
 )
 
 func main() {

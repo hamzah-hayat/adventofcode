@@ -2,7 +2,8 @@ package intcode
 
 import "fmt"
 
-func runIntCodeProgram(program []int, input chan int, output chan int) {
+// RunIntCodeProgram runs an intcode program
+func RunIntCodeProgram(program []int, input chan int, output chan int) {
 
 	teriminate := false
 	// Loop over opCodes, starting from zero
