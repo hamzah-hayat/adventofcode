@@ -30,13 +30,13 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 			opCodeI = opCodeI + 4
 			break
 		case 3:
-			fmt.Println("Waiting for input")
+			//fmt.Println("Waiting for input")
 			program[program[opCodeI+1]] = <-input
 			opCodeI = opCodeI + 2
 			break
 		case 4:
 			param1 := getOneParams(program, paramModes, opCodeI)
-			fmt.Println("The output is", param1)
+			//fmt.Println("The output is", param1)
 			output <- param1
 			opCodeI = opCodeI + 2
 			break
