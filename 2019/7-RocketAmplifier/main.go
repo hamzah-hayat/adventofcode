@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -122,7 +122,7 @@ func runRocketsWithSignals(program []int, signalSet []int) int {
 	return <-output
 }
 
-//RunRocketAmplifiers takes a program, runs it through 5 different amplifiers, then outputs the highest result
+//RunRocketAmplifiersLoop takes a program, runs it through 5 different amplifiers, then outputs the highest result, this one also loops continually
 func RunRocketAmplifiersLoop(program []int, signals []int) int {
 	highestResult := 0
 
