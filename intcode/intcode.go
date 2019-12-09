@@ -3,7 +3,13 @@ package intcode
 import "fmt"
 
 // RunIntCodeProgram runs an intcode program
-func RunIntCodeProgram(program []int, input chan int, output chan int) {
+func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
+
+	// Use maps instead of int arrays
+	program := make(map[int]int)
+	for i, val := range programInt {
+		program[i] = val
+	}
 
 	teriminate := false
 	relativeBase := 0
@@ -114,42 +120,33 @@ func readOpCode(opCodeFull int) (int, [3]int) {
 
 	params := (opCodeFull - opCode) / 100
 
-	switch params {
-	case 1:
-		parameterModes[2] = 1
-		break
-	case 11:
-		parameterModes[2] = 1
-		parameterModes[1] = 1
-		break
-	case 10:
-		parameterModes[1] = 1
-		break
-	}
+	parameterModes[0] = params % 10
+	parameterModes[1] = (params / 10) % 10
+	parameterModes[2] = (params / 100) % 10
 
 	return opCode, parameterModes
 }
 
-func getOneParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) int {
+func getOneParams(program map[int]int, paramModes [3]int, opCodeI int, relativeBase int) int {
 	param1 := 0
-	if paramModes[2] == 0 {
+	if paramModes[0] == 0 {
 		param1 = program[program[opCodeI+1]]
-	} else if paramModes[2] == 1 {
+	} else if paramModes[0] == 1 {
 		param1 = program[opCodeI+1]
-	} else if paramModes[2] == 2 {
+	} else if paramModes[0] == 2 {
 		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
 	return param1
 }
 
-func getTwoParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) (int, int) {
+func getTwoParams(program map[int]int, paramModes [3]int, opCodeI int, relativeBase int) (int, int) {
 	param1 := 0
-	if paramModes[2] == 0 {
+	if paramModes[0] == 0 {
 		param1 = program[program[opCodeI+1]]
-	} else if paramModes[2] == 1 {
+	} else if paramModes[0] == 1 {
 		param1 = program[opCodeI+1]
-	} else if paramModes[2] == 2 {
+	} else if paramModes[0] == 2 {
 		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
@@ -166,14 +163,14 @@ func getTwoParams(program []int, paramModes [3]int, opCodeI int, relativeBase in
 
 }
 
-func getThreeParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) (int, int, int) {
+func getThreeParams(program map[int]int, paramModes [3]int, opCodeI int, relativeBase int) (int, int, int) {
 
 	param1 := 0
-	if paramModes[2] == 0 {
+	if paramModes[0] == 0 {
 		param1 = program[program[opCodeI+1]]
-	} else if paramModes[2] == 1 {
+	} else if paramModes[0] == 1 {
 		param1 = program[opCodeI+1]
-	} else if paramModes[2] == 2 {
+	} else if paramModes[0] == 2 {
 		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
@@ -187,11 +184,11 @@ func getThreeParams(program []int, paramModes [3]int, opCodeI int, relativeBase 
 	}
 
 	param3 := 0
-	if paramModes[0] == 0 {
+	if paramModes[2] == 0 {
 		param3 = program[program[opCodeI+3]]
-	} else if paramModes[0] == 1 {
+	} else if paramModes[2] == 1 {
 		param3 = program[opCodeI+3]
-	} else if paramModes[0] == 2 {
+	} else if paramModes[2] == 2 {
 		param3 = program[program[opCodeI+3]] + relativeBase
 	}
 	return param1, param2, param3

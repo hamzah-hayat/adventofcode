@@ -346,25 +346,45 @@ func TestIntCode_Print16DigitNumber(t *testing.T) {
 
 }
 
-func TestIntCode_ProduceCopyOfSelf(t *testing.T) {
+// func TestIntCode_ProduceCopyOfSelf(t *testing.T) {
 
-	program := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
-	expected := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
+// 	program := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
+// 	expected := []int{109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99}
 
-	// First channel is for input
-	input := make(chan int)
-	// Second channel is for output
-	output := make(chan int)
+// 	// First channel is for input
+// 	input := make(chan int)
+// 	// Second channel is for output
+// 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+// 	go RunIntCodeProgram(program, input, output)
 
-	var result [16]int
-	for i := 0; i < 15; i++ {
-		result[i] = <-output
+// 	var result [16]int
+// 	for i := 0; i < 15; i++ {
+// 		result[i] = <-output
 
-		if expected[i] != result[i] {
-			t.Error(fmt.Sprint("Expected output ", expected, " but got ", result))
+// 		if expected[i] != result[i] {
+// 			t.Error(fmt.Sprint("Expected output ", expected, " but got ", result))
+// 		}
+// 	}
+
+// }
+
+// OPCode reading tests
+
+func TestOPCodeRead_simple(t *testing.T) {
+
+	testOpCodes := []int{101, 1001, 204}
+	expectedOpCodes := []int{1, 1, 4}
+	expectedParamModes := [][3]int{{1, 0, 0}, {0, 1, 0}, {2, 0, 0}}
+
+	for i, test := range testOpCodes {
+
+		opCode, paramModes := readOpCode(test)
+
+		if expectedOpCodes[i] != opCode || expectedParamModes[i] != paramModes {
+			t.Error(fmt.Sprint("Expected ", expectedOpCodes[i], " and", expectedParamModes[i], " but got ", opCode, " and", paramModes))
 		}
+
 	}
 
 }
