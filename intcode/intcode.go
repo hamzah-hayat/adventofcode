@@ -6,6 +6,7 @@ import "fmt"
 func RunIntCodeProgram(program []int, input chan int, output chan int) {
 
 	teriminate := false
+	relativeBase := 0
 	// Loop over opCodes, starting from zero
 	for opCodeI := 0; opCodeI < len(program); {
 
@@ -16,14 +17,14 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 
 		switch opCode {
 		case 1:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Added to", program[opCodeI+3], "the numbers", param1, "and", param2)
 
 			program[program[opCodeI+3]] = param1 + param2
 			opCodeI = opCodeI + 4
 			break
 		case 2:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Multiplied to", program[opCodeI+3], "the numbers", param1, "and", param2)
 
 			program[program[opCodeI+3]] = param1 * param2
@@ -35,13 +36,13 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 			opCodeI = opCodeI + 2
 			break
 		case 4:
-			param1 := getOneParams(program, paramModes, opCodeI)
+			param1 := getOneParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("The output is", param1)
 			output <- param1
 			opCodeI = opCodeI + 2
 			break
 		case 5:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is non zero, will place answer in", param2)
 			if param1 != 0 {
 				opCodeI = param2
@@ -50,7 +51,7 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 			}
 			break
 		case 6:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is zero, will place answer in", param2)
 			if param1 == 0 {
 				opCodeI = param2
@@ -59,7 +60,7 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 			}
 			break
 		case 7:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is less then", param2, " will place answer in", program[program[opCodeI+3]])
 			if param1 < param2 {
 				program[program[opCodeI+3]] = 1
@@ -69,7 +70,7 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 			opCodeI = opCodeI + 4
 			break
 		case 8:
-			param1, param2 := getTwoParams(program, paramModes, opCodeI)
+			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is equal to", param2, " will place answer in", program[program[opCodeI+3]])
 			if param1 == param2 {
 				program[program[opCodeI+3]] = 1
@@ -77,6 +78,12 @@ func RunIntCodeProgram(program []int, input chan int, output chan int) {
 				program[program[opCodeI+3]] = 0
 			}
 			opCodeI = opCodeI + 4
+			break
+		case 9:
+			param1 := getOneParams(program, paramModes, opCodeI, relativeBase)
+			//fmt.Println("The output is", param1)
+			relativeBase += param1
+			opCodeI = opCodeI + 2
 			break
 		case 99:
 			//fmt.Println("teriminated")
@@ -123,23 +130,27 @@ func readOpCode(opCodeFull int) (int, [3]int) {
 	return opCode, parameterModes
 }
 
-func getOneParams(program []int, paramModes [3]int, opCodeI int) int {
+func getOneParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) int {
 	param1 := 0
 	if paramModes[2] == 0 {
 		param1 = program[program[opCodeI+1]]
 	} else if paramModes[2] == 1 {
 		param1 = program[opCodeI+1]
+	} else if paramModes[2] == 2 {
+		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
 	return param1
 }
 
-func getTwoParams(program []int, paramModes [3]int, opCodeI int) (int, int) {
+func getTwoParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) (int, int) {
 	param1 := 0
 	if paramModes[2] == 0 {
 		param1 = program[program[opCodeI+1]]
 	} else if paramModes[2] == 1 {
 		param1 = program[opCodeI+1]
+	} else if paramModes[2] == 2 {
+		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
 	param2 := 0
@@ -147,19 +158,23 @@ func getTwoParams(program []int, paramModes [3]int, opCodeI int) (int, int) {
 		param2 = program[program[opCodeI+2]]
 	} else if paramModes[1] == 1 {
 		param2 = program[opCodeI+2]
+	} else if paramModes[1] == 2 {
+		param2 = program[program[opCodeI+2]] + relativeBase
 	}
 
 	return param1, param2
 
 }
 
-func getThreeParams(program []int, paramModes [3]int, opCodeI int) (int, int, int) {
+func getThreeParams(program []int, paramModes [3]int, opCodeI int, relativeBase int) (int, int, int) {
 
 	param1 := 0
 	if paramModes[2] == 0 {
 		param1 = program[program[opCodeI+1]]
 	} else if paramModes[2] == 1 {
 		param1 = program[opCodeI+1]
+	} else if paramModes[2] == 2 {
+		param1 = program[program[opCodeI+1]] + relativeBase
 	}
 
 	param2 := 0
@@ -167,6 +182,8 @@ func getThreeParams(program []int, paramModes [3]int, opCodeI int) (int, int, in
 		param2 = program[program[opCodeI+2]]
 	} else if paramModes[1] == 1 {
 		param2 = program[opCodeI+2]
+	} else if paramModes[1] == 2 {
+		param2 = program[program[opCodeI+2]] + relativeBase
 	}
 
 	param3 := 0
@@ -174,6 +191,8 @@ func getThreeParams(program []int, paramModes [3]int, opCodeI int) (int, int, in
 		param3 = program[program[opCodeI+3]]
 	} else if paramModes[0] == 1 {
 		param3 = program[opCodeI+3]
+	} else if paramModes[0] == 2 {
+		param3 = program[program[opCodeI+3]] + relativeBase
 	}
 	return param1, param2, param3
 }
