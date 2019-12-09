@@ -134,7 +134,7 @@ func getOneParams(program map[int]int, paramModes [3]int, opCodeI int, relativeB
 	} else if paramModes[0] == 1 {
 		param1 = program[opCodeI+1]
 	} else if paramModes[0] == 2 {
-		param1 = program[program[opCodeI+1]] + relativeBase
+		param1 = program[program[opCodeI+1]+relativeBase]
 	}
 
 	return param1
@@ -147,7 +147,7 @@ func getTwoParams(program map[int]int, paramModes [3]int, opCodeI int, relativeB
 	} else if paramModes[0] == 1 {
 		param1 = program[opCodeI+1]
 	} else if paramModes[0] == 2 {
-		param1 = program[program[opCodeI+1]] + relativeBase
+		param1 = program[program[opCodeI+1]+relativeBase]
 	}
 
 	param2 := 0
@@ -156,40 +156,9 @@ func getTwoParams(program map[int]int, paramModes [3]int, opCodeI int, relativeB
 	} else if paramModes[1] == 1 {
 		param2 = program[opCodeI+2]
 	} else if paramModes[1] == 2 {
-		param2 = program[program[opCodeI+2]] + relativeBase
+		param2 = program[program[opCodeI+2]+relativeBase]
 	}
 
 	return param1, param2
 
-}
-
-func getThreeParams(program map[int]int, paramModes [3]int, opCodeI int, relativeBase int) (int, int, int) {
-
-	param1 := 0
-	if paramModes[0] == 0 {
-		param1 = program[program[opCodeI+1]]
-	} else if paramModes[0] == 1 {
-		param1 = program[opCodeI+1]
-	} else if paramModes[0] == 2 {
-		param1 = program[program[opCodeI+1]] + relativeBase
-	}
-
-	param2 := 0
-	if paramModes[1] == 0 {
-		param2 = program[program[opCodeI+2]]
-	} else if paramModes[1] == 1 {
-		param2 = program[opCodeI+2]
-	} else if paramModes[1] == 2 {
-		param2 = program[program[opCodeI+2]] + relativeBase
-	}
-
-	param3 := 0
-	if paramModes[2] == 0 {
-		param3 = program[program[opCodeI+3]]
-	} else if paramModes[2] == 1 {
-		param3 = program[opCodeI+3]
-	} else if paramModes[2] == 2 {
-		param3 = program[program[opCodeI+3]] + relativeBase
-	}
-	return param1, param2, param3
 }

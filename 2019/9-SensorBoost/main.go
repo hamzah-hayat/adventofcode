@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"flag"
-	"github.com/hamzah-hayat/adventofcode/intcode"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/hamzah-hayat/adventofcode/intcode"
 )
 
 func main() {
@@ -28,19 +29,22 @@ func main() {
 }
 
 func partOne() {
-	//input := readInput()
-	//program := convertToInts(input)
+	input := readInput()
+	program := convertToInts(input)
 
-	//intcode.RunIntCodeProgram()
+	// First channel is for input
+	inputChan := make(chan int)
+	// Second channel is for output
+	outputChan := make(chan int)
 
-	a :=3
+	go intcode.RunIntCodeProgram(program, inputChan, outputChan)
 
-	if(a==0){
-		fmt.Println("zero")
-	} else if a==1 {
-		fmt.Println("two")
+	// Run computer in test mode
+	inputChan <- 1
+
+	for {
+		fmt.Println(<-outputChan)
 	}
-
 }
 
 func partTwo() {
