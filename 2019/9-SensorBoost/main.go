@@ -42,9 +42,7 @@ func partOne() {
 	// Run computer in test mode
 	inputChan <- 1
 
-	for {
-		fmt.Println(<-outputChan)
-	}
+	fmt.Println(<-outputChan)
 }
 
 func partTwo() {

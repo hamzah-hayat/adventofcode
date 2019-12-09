@@ -306,7 +306,29 @@ func TestIntCode_CheckNumberAgainst8_Greater(t *testing.T) {
 
 }
 
-// Relative Mode Feature
+// Test Relative Mode
+
+func TestIntCode_RelativeMode_Simple(t *testing.T) {
+
+	program := []int{9,3,203, 10, 204, 10, 99}
+	expected := 99
+
+	// First channel is for input
+	input := make(chan int)
+	// Second channel is for output
+	output := make(chan int)
+
+	go RunIntCodeProgram(program, input, output)
+	input <- 99
+	result := <-output
+
+	if expected != result {
+		t.Error(fmt.Sprint("Expected output ", expected, " but got ", result))
+	}
+
+}
+
+// Extra features
 
 func TestIntCode_PrintLargeNumber(t *testing.T) {
 

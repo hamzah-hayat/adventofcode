@@ -25,20 +25,18 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
 		case 1:
 			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Added to", program[opCodeI+3], "the numbers", param1, "and", param2)
-
-			program[program[opCodeI+3]] = param1 + param2
+			placeParam(program, paramModes, 2, opCodeI, relativeBase, param1+param2)
 			opCodeI = opCodeI + 4
 			break
 		case 2:
 			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Multiplied to", program[opCodeI+3], "the numbers", param1, "and", param2)
-
-			program[program[opCodeI+3]] = param1 * param2
+			placeParam(program, paramModes, 2, opCodeI, relativeBase, param1*param2)
 			opCodeI = opCodeI + 4
 			break
 		case 3:
 			//fmt.Println("Waiting for input")
-			program[program[opCodeI+1]] = <-input
+			placeParam(program, paramModes, 0, opCodeI, relativeBase, <-input)
 			opCodeI = opCodeI + 2
 			break
 		case 4:
@@ -69,9 +67,9 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
 			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is less then", param2, " will place answer in", program[program[opCodeI+3]])
 			if param1 < param2 {
-				program[program[opCodeI+3]] = 1
+				placeParam(program, paramModes, 2, opCodeI, relativeBase, 1)
 			} else {
-				program[program[opCodeI+3]] = 0
+				placeParam(program, paramModes, 2, opCodeI, relativeBase, 0)
 			}
 			opCodeI = opCodeI + 4
 			break
@@ -79,9 +77,9 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
 			param1, param2 := getTwoParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("Checking if", param1, " is equal to", param2, " will place answer in", program[program[opCodeI+3]])
 			if param1 == param2 {
-				program[program[opCodeI+3]] = 1
+				placeParam(program, paramModes, 2, opCodeI, relativeBase, 1)
 			} else {
-				program[program[opCodeI+3]] = 0
+				placeParam(program, paramModes, 2, opCodeI, relativeBase, 0)
 			}
 			opCodeI = opCodeI + 4
 			break
@@ -161,4 +159,13 @@ func getTwoParams(program map[int]int, paramModes [3]int, opCodeI int, relativeB
 
 	return param1, param2
 
+}
+
+// Place a parameter into the program based on relative or position mode
+func placeParam(program map[int]int, paramModes [3]int, outputParam int, opCodeI int, relativeBase int, value int) {
+	if paramModes[outputParam] == 0 {
+		program[program[opCodeI+outputParam+1]] = value
+	} else if paramModes[outputParam] == 2 {
+		program[program[opCodeI+outputParam+1]+relativeBase] = value
+	}
 }
