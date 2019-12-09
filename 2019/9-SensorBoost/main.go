@@ -46,8 +46,20 @@ func partOne() {
 }
 
 func partTwo() {
-	//input := readInput()
-	//program := convertToInts(input)
+	input := readInput()
+	program := convertToInts(input)
+
+	// First channel is for input
+	inputChan := make(chan int)
+	// Second channel is for output
+	outputChan := make(chan int)
+
+	go intcode.RunIntCodeProgram(program, inputChan, outputChan)
+
+	// Run computer in test mode
+	inputChan <- 2
+
+	fmt.Println(<-outputChan)
 
 }
 
