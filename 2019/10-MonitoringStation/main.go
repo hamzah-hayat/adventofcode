@@ -4,7 +4,9 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -54,7 +56,7 @@ func numberOfAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space
 	// Grab just our asteroids
 	asteroids := make(map[space]bool)
 	for i, asteroid := range asteroidMap {
-		if asteroid {
+		if asteroid && i != searchSpot {
 			asteroids[i] = true
 		}
 	}
@@ -63,9 +65,8 @@ func numberOfAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space
 	// For each space, check against another one
 	for i := range asteroids {
 		colinear := false
-		asteroidsSeeable = 0
 		for j := range asteroids {
-			if i == j || i == searchSpot || j == searchSpot {
+			if i == j {
 				continue
 			}
 			// Also make sure that both i and j are on the same "side"
@@ -82,6 +83,11 @@ func numberOfAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space
 				continue
 			}
 
+			// And that I is is closer then j
+			if math.Abs(manhatten(searchSpot, i)) < math.Abs(manhatten(searchSpot, j)) {
+				continue
+			}
+
 			// Check if these two points are colinear (with searchspot as well)
 			// 1st point is searchSpot
 			// 2nd point is i
@@ -89,7 +95,6 @@ func numberOfAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space
 			area := searchSpot.x*(i.y-j.y) + i.x*(j.y-searchSpot.y) + j.x*(searchSpot.y-i.y)
 			if area == 0 {
 				colinear = true
-				break
 			}
 		}
 		if !colinear {
@@ -101,7 +106,82 @@ func numberOfAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space
 }
 
 func partTwo() {
-	//input := readInput()
+	input := readInput()
+
+	asteroidMap := createAsteroidMap(input)
+
+	highest := 0
+	var highestSpace space
+
+	for i, value := range asteroidMap {
+		if value {
+			num := numberOfAsteroidsSeenFromSpace(asteroidMap, i)
+			if num > highest {
+				highest = num
+				highestSpace = i
+			}
+		}
+	}
+
+	// Best space is highestSpace
+	the200thAsteroid := vapeAsteroids(asteroidMap, highestSpace, 200)
+
+	fmt.Println("The 200th space to be destroyed is", the200thAsteroid)
+}
+
+// Starting from the lazer space, face north and destroy each asteroid in order, keep doing this until the 200th asteroid, return that one
+func vapeAsteroids(asteroidMap map[space]bool, lazer space, destroyedNum int) spaceWithCenter {
+
+	// Sort the asteroids, then start destroying them
+	// Use sort
+	var sortedAsteroids spaces
+	for i, s := range asteroidMap {
+		if s == true {
+			sortedAsteroids = append(sortedAsteroids, spaceWithCenter{x: i.x, y: i.y, center: lazer})
+		}
+	}
+
+	sort.Sort(sortedAsteroids)
+
+	return sortedAsteroids[destroyedNum-1]
+}
+
+// try and sort with center
+type spaces []spaceWithCenter
+
+func (a spaces) Len() int      { return len(a) }
+func (a spaces) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+
+// Check if this space is more counter clockwise then another
+func (spaceArray spaces) Less(i int, j int) bool {
+
+	if spaceArray[i].x-spaceArray[i].center.x >= 0 && spaceArray[j].x-spaceArray[i].center.x < 0 {
+		return true
+	}
+	if spaceArray[i].x-spaceArray[i].center.x < 0 && spaceArray[j].x-spaceArray[i].center.x >= 0 {
+		return false
+	}
+	if spaceArray[i].x-spaceArray[i].center.x == 0 && spaceArray[j].x-spaceArray[i].center.x == 0 {
+		if spaceArray[i].y-spaceArray[i].center.y >= 0 || spaceArray[j].y-spaceArray[i].center.y >= 0 {
+			return spaceArray[i].y > spaceArray[j].y
+		}
+		return spaceArray[j].y > spaceArray[i].y
+	}
+
+	// compute the cross product of vectors (center -> a) x (center -> b)
+	det := (spaceArray[i].x-spaceArray[i].center.x)*(spaceArray[j].y-spaceArray[i].center.y) - (spaceArray[j].x-spaceArray[i].center.x)*(spaceArray[i].y-spaceArray[i].center.y)
+	if det < 0 {
+		return true
+	}
+	if det > 0 {
+		return false
+	}
+
+	// points a and b are on the same line from the center
+	// check which point is closer to the center
+	d1 := (spaceArray[i].x-spaceArray[i].center.x)*(spaceArray[i].x-spaceArray[i].center.x) + (spaceArray[i].y-spaceArray[i].center.y)*(spaceArray[i].y-spaceArray[i].center.y)
+	d2 := (spaceArray[j].x-spaceArray[i].center.x)*(spaceArray[j].x-spaceArray[i].center.x) + (spaceArray[j].y-spaceArray[i].center.y)*(spaceArray[j].y-spaceArray[i].center.y)
+	return d1 > d2
 }
 
 func createAsteroidMap(input []string) map[space]bool {
@@ -121,6 +201,15 @@ func createAsteroidMap(input []string) map[space]bool {
 
 type space struct {
 	x, y int
+}
+
+type spaceWithCenter struct {
+	x, y   int
+	center space
+}
+
+func manhatten(first space, second space) float64 {
+	return float64(first.x - second.x + first.y - second.y)
 }
 
 // Read data from input.txt
