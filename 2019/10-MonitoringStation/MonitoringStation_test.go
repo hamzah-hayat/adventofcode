@@ -45,16 +45,42 @@ func TestMonitoringStationVapeSmallCheck(t *testing.T) {
 		"..#.....#...###..",
 		"..#.#.....#....##",
 	}
+	expected := spaceWithCenter{x: 8, y: 1, center: space{x: 8, y: 3}}
+
+	asteroidMap := createAsteroidMap(input)
+
+	highestSpace := space{x: 8, y: 3}
+
+	asteroidMap[highestSpace] = false
+	// Best space is highestSpace
+	the200thAsteroid := vapeAsteroids(asteroidMap, highestSpace, 1)
+
+	fmt.Println("The 1st space to be destroyed is", the200thAsteroid)
+
+	if the200thAsteroid != expected {
+		t.Error(fmt.Sprint("Expected output ", expected, " but got ", the200thAsteroid))
+	}
+
+}
+
+func TestMonitoringStationVapeSmallCheck2(t *testing.T) {
+
+	input := []string{
+		".#....#####...#..",
+		"##...##.#####..##",
+		"##...#...#.#####.",
+		"..#.....#...###..",
+		"..#.#.....#....##",
+	}
 	expected := spaceWithCenter{x: 15, y: 1, center: space{x: 8, y: 3}}
 
 	asteroidMap := createAsteroidMap(input)
 
 	highestSpace := space{x: 8, y: 3}
 
+	asteroidMap[highestSpace] = false
 	// Best space is highestSpace
 	the200thAsteroid := vapeAsteroids(asteroidMap, highestSpace, 9)
-
-	fmt.Println("The 9th space to be destroyed is", the200thAsteroid)
 
 	if the200thAsteroid != expected {
 		t.Error(fmt.Sprint("Expected output ", expected, " but got ", the200thAsteroid))

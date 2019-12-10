@@ -134,8 +134,9 @@ func vapeAsteroids(asteroidMap map[space]bool, lazer space, destroyedNum int) sp
 
 	// Sort the asteroids, then start destroying them
 	// Use sort
+	seeableAsteroids := getAsteroidsSeenFromSpace(asteroidMap, lazer)
 	var sortedAsteroids spaces
-	for i, s := range asteroidMap {
+	for i, s := range seeableAsteroids {
 		if s == true {
 			sortedAsteroids = append(sortedAsteroids, spaceWithCenter{x: i.x, y: i.y, center: lazer})
 		}
@@ -155,33 +156,96 @@ func (a spaces) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 // Check if this space is more counter clockwise then another
 func (spaceArray spaces) Less(i int, j int) bool {
 
-	if spaceArray[i].x-spaceArray[i].center.x >= 0 && spaceArray[j].x-spaceArray[i].center.x < 0 {
+	a := spaceArray[i]
+	b := spaceArray[j]
+
+	if a.x-a.center.x >= 0 && b.x-a.center.x < 0 {
 		return true
 	}
-	if spaceArray[i].x-spaceArray[i].center.x < 0 && spaceArray[j].x-spaceArray[i].center.x >= 0 {
+	if a.x-a.center.x < 0 && b.x-a.center.x >= 0 {
 		return false
 	}
-	if spaceArray[i].x-spaceArray[i].center.x == 0 && spaceArray[j].x-spaceArray[i].center.x == 0 {
-		if spaceArray[i].y-spaceArray[i].center.y >= 0 || spaceArray[j].y-spaceArray[i].center.y >= 0 {
-			return spaceArray[i].y > spaceArray[j].y
+	if a.x-a.center.x == 0 && b.x-a.center.x == 0 {
+		if a.y-a.center.y >= 0 || b.y-a.center.y >= 0 {
+			return a.y > b.y
 		}
-		return spaceArray[j].y > spaceArray[i].y
+		return b.y < a.y
 	}
 
 	// compute the cross product of vectors (center -> a) x (center -> b)
-	det := (spaceArray[i].x-spaceArray[i].center.x)*(spaceArray[j].y-spaceArray[i].center.y) - (spaceArray[j].x-spaceArray[i].center.x)*(spaceArray[i].y-spaceArray[i].center.y)
-	if det < 0 {
+	// det := ((a.x - a.center.x) * (b.y - a.center.y)) - ((b.x - a.center.x) * (a.y - a.center.y))
+	deta := (a.x - a.center.x) * (b.y - a.center.y)
+	detb := (b.x - a.center.x) * (a.y - a.center.y)
+	det := deta - detb
+	if det > 0 {
 		return true
 	}
-	if det > 0 {
+	if det < 0 {
 		return false
 	}
 
 	// points a and b are on the same line from the center
 	// check which point is closer to the center
-	d1 := (spaceArray[i].x-spaceArray[i].center.x)*(spaceArray[i].x-spaceArray[i].center.x) + (spaceArray[i].y-spaceArray[i].center.y)*(spaceArray[i].y-spaceArray[i].center.y)
-	d2 := (spaceArray[j].x-spaceArray[i].center.x)*(spaceArray[j].x-spaceArray[i].center.x) + (spaceArray[j].y-spaceArray[i].center.y)*(spaceArray[j].y-spaceArray[i].center.y)
-	return d1 > d2
+	d1 := (a.x-a.center.x)*(a.x-a.center.x) + (a.y-a.center.y)*(a.y-a.center.y)
+	d2 := (b.x-a.center.x)*(b.x-a.center.x) + (b.y-a.center.y)*(b.y-a.center.y)
+	return d1 < d2
+}
+
+// Get the asteroids we can see from the search space
+func getAsteroidsSeenFromSpace(asteroidMap map[space]bool, searchSpot space) map[space]bool {
+
+	// Grab just our asteroids
+	asteroids := make(map[space]bool)
+	for i, asteroid := range asteroidMap {
+		if asteroid && i != searchSpot {
+			asteroids[i] = true
+		}
+	}
+
+	seeable := make(map[space]bool)
+	// For each space, check against another one
+	for i := range asteroids {
+		colinear := false
+		for j := range asteroids {
+			if i == j {
+				continue
+			}
+			// Also make sure that both i and j are on the same "side"
+			if i.x > searchSpot.x && j.x < searchSpot.x {
+				continue
+			}
+			if i.y > searchSpot.y && j.y < searchSpot.y {
+				continue
+			}
+			if i.x < searchSpot.x && j.x > searchSpot.x {
+				continue
+			}
+			if i.y < searchSpot.y && j.y > searchSpot.y {
+				continue
+			}
+
+			// And that I is is closer then j
+			d1 := (i.x-searchSpot.x)*(i.x-searchSpot.x) + (i.y-searchSpot.y)*(i.y-searchSpot.y)
+			d2 := (j.x-searchSpot.x)*(j.x-searchSpot.x) + (j.y-searchSpot.y)*(j.y-searchSpot.y)
+			if d1 < d2 {
+				continue
+			}
+
+			// Check if these two points are colinear (with searchspot as well)
+			// 1st point is searchSpot
+			// 2nd point is i
+			// 3rd point is j
+			area := searchSpot.x*(i.y-j.y) + i.x*(j.y-searchSpot.y) + j.x*(searchSpot.y-i.y)
+			if area == 0 {
+				colinear = true
+			}
+		}
+		if !colinear {
+			seeable[i] = true
+		}
+	}
+
+	return seeable
 }
 
 func createAsteroidMap(input []string) map[space]bool {
