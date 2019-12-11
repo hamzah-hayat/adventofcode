@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -13,7 +14,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -39,17 +40,25 @@ func partOne() {
 	// Terimnation channel
 	t := make(chan bool)
 
+	grid := make(map[space]int) // All spaces start as 0 implicity, aka black
+
 	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
 
 	// Run the robot
-	paintedTiles := runRobotPainter(inputChan, outputChan, t)
+	painted := runRobotPainter(inputChan, outputChan, t, grid)
+
+	paintedTiles := 0
+	for _, val := range painted {
+		if val {
+			paintedTiles++
+		}
+	}
 
 	fmt.Println("The number of painted tiles is", paintedTiles)
 }
 
-func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool) int {
+func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool, grid map[space]int) map[space]bool {
 
-	grid := make(map[space]int)     // All spaces start as 0 implicity, aka black
 	painted := make(map[space]bool) // The map of painted tiles, that were painted at least once by the robot
 
 	x := 0
@@ -107,14 +116,7 @@ func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool) int {
 			break
 		}
 	}
-
-	paintedTiles := 0
-	for _, val := range painted {
-		if val {
-			paintedTiles++
-		}
-	}
-	return paintedTiles
+	return painted
 }
 
 func mod(d, m int) int {
@@ -133,14 +135,112 @@ func partTwo() {
 	inputChan := make(chan int)
 	// Second channel is for output
 	outputChan := make(chan int)
+	// Terimnation channel
+	t := make(chan bool)
 
-	go intcode.RunIntCodeProgram(program, inputChan, outputChan)
+	grid := make(map[space]int) // All spaces start as 0 implicity, aka black
 
-	// Run computer in test mode
-	// inputChan <- 2
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
 
-	// fmt.Println(<-outputChan)
+	// Run the robot
+	// Set inital tile to 1
+	grid[space{x: 0, y: 0}] = 1
+	paintedGrid := runRobotPainterReturnPaintedGrid(inputChan, outputChan, t, grid)
 
+	// Find the xMin,xMax and ymin,yMax
+	xMin := math.MaxInt64
+	xMax := -math.MaxInt64
+	yMin := math.MaxInt64
+	yMax := -math.MaxInt64
+
+	for i := range paintedGrid {
+		if i.x < xMin {
+			xMin = i.x
+		} else if i.x > xMax {
+			xMax = i.x
+		}
+
+		if i.y < yMin {
+			yMin = i.y
+		} else if i.y > yMax {
+			yMax = i.y
+		}
+	}
+
+	// now print the grid
+
+	picture := ""
+	for i := xMin; i < xMax; i++ {
+		for j := yMin; j < yMax; j++ {
+			if (paintedGrid[space{x: i, y: j}] == 1) {
+				picture += "#"
+			} else {
+				picture += "-"
+			}
+		}
+		picture += "\n"
+	}
+
+	fmt.Println(picture)
+
+}
+
+func runRobotPainterReturnPaintedGrid(inputChan chan int, outputChan chan int, t chan bool, grid map[space]int) map[space]int {
+
+	x := 0
+	y := 0
+	d := 0
+
+	teriminate := false
+	for {
+
+		select {
+		case <-t:
+			teriminate = true
+			break
+		case inputChan <- grid[space{x: x, y: y}]:
+			paintOutput := <-outputChan
+			moveOutput := <-outputChan
+
+			// Paint the tile
+			if paintOutput == 0 {
+				grid[space{x: x, y: y}] = 0
+			} else if paintOutput == 1 {
+				grid[space{x: x, y: y}] = 1
+			}
+
+			// Then change direction and move
+			if moveOutput == 0 {
+				d = mod((d - 1), 4)
+			} else if moveOutput == 1 {
+				d = mod((d + 1), 4)
+			}
+
+			// Then move in that direction
+			switch d {
+			case 0:
+				x--
+				break
+			case 1:
+				y++
+				break
+			case 2:
+				x++
+				break
+			case 3:
+				y--
+				break
+			}
+
+			if teriminate {
+				break
+			}
+		}
+		if teriminate {
+			break
+		}
+	}
+	return grid
 }
 
 type space struct {
