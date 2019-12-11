@@ -310,7 +310,7 @@ func TestIntCode_CheckNumberAgainst8_Greater(t *testing.T) {
 
 func TestIntCode_RelativeMode_Simple(t *testing.T) {
 
-	program := []int{9,3,203, 10, 204, 10, 99}
+	program := []int{9, 3, 203, 10, 204, 10, 99}
 	expected := 99
 
 	// First channel is for input
@@ -334,6 +334,25 @@ func TestIntCode_PrintLargeNumber(t *testing.T) {
 
 	program := []int{104, 1125899906842624, 99}
 	expected := 1125899906842624
+
+	// First channel is for input
+	input := make(chan int)
+	// Second channel is for output
+	output := make(chan int)
+
+	go RunIntCodeProgram(program, input, output)
+	result := <-output
+
+	if expected != result {
+		t.Error(fmt.Sprint("Expected output ", expected, " but got ", result))
+	}
+
+}
+
+func TestIntCode_LargeMemorySpace(t *testing.T) {
+
+	program := []int{1101, 1, 1, 10000000, 4, 10000000, 99}
+	expected := 2
 
 	// First channel is for input
 	input := make(chan int)
