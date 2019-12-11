@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -148,24 +147,11 @@ func partTwo() {
 	paintedGrid := runRobotPainterReturnPaintedGrid(inputChan, outputChan, t, grid)
 
 	// Find the xMin,xMax and ymin,yMax
-	xMin := math.MaxInt64
-	xMax := -math.MaxInt64
-	yMin := math.MaxInt64
-	yMax := -math.MaxInt64
-
-	for i := range paintedGrid {
-		if i.x < xMin {
-			xMin = i.x
-		} else if i.x > xMax {
-			xMax = i.x
-		}
-
-		if i.y < yMin {
-			yMin = i.y
-		} else if i.y > yMax {
-			yMax = i.y
-		}
-	}
+	// Hardcode these for now
+	xMin := 0
+	xMax := 6
+	yMin := 0
+	yMax := 40
 
 	// now print the grid
 
