@@ -62,8 +62,9 @@ func partTwo() {
 	foundYCounter := 0
 	foundZ := false
 	foundZCounter := 0
-	counter := 0
+	counter := 1
 	for {
+		counter++
 		moons, velos = moveMoons(moons, velos)
 
 		if !foundX {
@@ -108,8 +109,6 @@ func partTwo() {
 		if foundX && foundY && foundZ {
 			break
 		}
-
-		counter++
 	}
 
 	fmt.Println("X,Y and Z were matching at ", foundXCounter, ",", foundYCounter, ",", foundZCounter, " respectively")
