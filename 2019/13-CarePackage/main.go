@@ -45,7 +45,7 @@ func partOne() {
 
 	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t, message)
 
-	screen := createGameScreen(outputChan, t)
+	screen := createGameScreen(outputChan, t, message)
 
 	count := 0
 	for _, val := range screen {
@@ -57,7 +57,7 @@ func partOne() {
 	fmt.Println("The number of block tiles is", count)
 }
 
-func createGameScreen(outputChan chan int, t chan bool) map[space]int {
+func createGameScreen(outputChan chan int, t chan bool, message chan intcode.Message) map[space]int {
 
 	screen := make(map[space]int)
 
@@ -67,11 +67,16 @@ func createGameScreen(outputChan chan int, t chan bool) map[space]int {
 		case <-t:
 			teriminate = true
 			break
-		case x := <-outputChan:
-			y := <-outputChan
-			tileID := <-outputChan
+		case m := <-message:
+			if m.MessageType == 1 {
+				x := <-outputChan
+				<-message
+				y := <-outputChan
+				<-message
+				tileID := <-outputChan
 
-			screen[space{x: x, y: y}] = tileID
+				screen[space{x: x, y: y}] = tileID
+			}
 		}
 
 		if teriminate {

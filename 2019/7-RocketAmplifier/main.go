@@ -151,11 +151,11 @@ func runRocketsWithSignalsLooped(program []int, signalSet []int) int {
 	// make a channel to wait for all goroutines to finish
 	t := make(chan bool)
 
-	go intcode.RunIntCodeProgramWaitForTermination(program, echan, achan, t)
-	go intcode.RunIntCodeProgramWaitForTermination(program, achan, bchan, t)
-	go intcode.RunIntCodeProgramWaitForTermination(program, bchan, cchan, t)
-	go intcode.RunIntCodeProgramWaitForTermination(program, cchan, dchan, t)
-	go intcode.RunIntCodeProgramWaitForTermination(program, dchan, echan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, echan, achan, t, nil)
+	go intcode.RunIntCodeProgramWaitForTermination(program, achan, bchan, t, nil)
+	go intcode.RunIntCodeProgramWaitForTermination(program, bchan, cchan, t, nil)
+	go intcode.RunIntCodeProgramWaitForTermination(program, cchan, dchan, t, nil)
+	go intcode.RunIntCodeProgramWaitForTermination(program, dchan, echan, t, nil)
 
 	// Initial pass
 	// send signals first

@@ -60,7 +60,6 @@ func PartTwo() {
 func runProgram(program []int) {
 
 	teriminate := false
-	reader := bufio.NewReader(os.Stdin)
 	// Loop over opCodes, starting from zero
 	for opCodeI := 0; opCodeI < len(program); {
 
@@ -110,9 +109,7 @@ func runProgram(program []int) {
 			break
 		case 3:
 			fmt.Println("Waiting for input")
-			text, _ := reader.ReadString('\n')
-			i, _ := strconv.Atoi(text)
-			program[program[opCodeI+1]] = i
+			program[program[opCodeI+1]] = 1
 			opCodeI = opCodeI + 2
 			break
 		case 4:

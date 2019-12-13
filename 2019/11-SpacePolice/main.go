@@ -38,13 +38,15 @@ func partOne() {
 	outputChan := make(chan int)
 	// Terimnation channel
 	t := make(chan bool)
+	// Message channel
+	message := make(chan intcode.Message)
 
 	grid := make(map[space]int) // All spaces start as 0 implicity, aka black
 
-	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t, message)
 
 	// Run the robot
-	painted := runRobotPainter(inputChan, outputChan, t, grid)
+	painted := runRobotPainter(inputChan, outputChan, t, message, grid)
 
 	paintedTiles := 0
 	for _, val := range painted {
@@ -56,7 +58,7 @@ func partOne() {
 	fmt.Println("The number of painted tiles is", paintedTiles)
 }
 
-func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool, grid map[space]int) map[space]bool {
+func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool, message chan intcode.Message, grid map[space]int) map[space]bool {
 
 	painted := make(map[space]bool) // The map of painted tiles, that were painted at least once by the robot
 
@@ -71,8 +73,11 @@ func runRobotPainter(inputChan chan int, outputChan chan int, t chan bool, grid 
 		case <-t:
 			teriminate = true
 			break
-		case inputChan <- grid[space{x: x, y: y}]:
+		case <-message:
+			inputChan <- grid[space{x: x, y: y}]
+			<-message
 			paintOutput := <-outputChan
+			<-message
 			moveOutput := <-outputChan
 
 			// Paint the tile
@@ -136,15 +141,17 @@ func partTwo() {
 	outputChan := make(chan int)
 	// Terimnation channel
 	t := make(chan bool)
+	// Message channel
+	message := make(chan intcode.Message)
 
 	grid := make(map[space]int) // All spaces start as 0 implicity, aka black
 
-	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t, message)
 
 	// Run the robot
 	// Set inital tile to 1
 	grid[space{x: 0, y: 0}] = 1
-	paintedGrid := runRobotPainterReturnPaintedGrid(inputChan, outputChan, t, grid)
+	paintedGrid := runRobotPainterReturnPaintedGrid(inputChan, outputChan, t, message, grid)
 
 	// Find the xMin,xMax and ymin,yMax
 	// Hardcode these for now
@@ -171,7 +178,7 @@ func partTwo() {
 
 }
 
-func runRobotPainterReturnPaintedGrid(inputChan chan int, outputChan chan int, t chan bool, grid map[space]int) map[space]int {
+func runRobotPainterReturnPaintedGrid(inputChan chan int, outputChan chan int, t chan bool, message chan intcode.Message, grid map[space]int) map[space]int {
 
 	x := 0
 	y := 0
@@ -184,8 +191,11 @@ func runRobotPainterReturnPaintedGrid(inputChan chan int, outputChan chan int, t
 		case <-t:
 			teriminate = true
 			break
-		case inputChan <- grid[space{x: x, y: y}]:
+		case <-message:
+			inputChan <- grid[space{x: x, y: y}]
+			<-message
 			paintOutput := <-outputChan
+			<-message
 			moveOutput := <-outputChan
 
 			// Paint the tile
