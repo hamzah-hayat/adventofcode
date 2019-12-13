@@ -3,7 +3,7 @@ package intcode
 import "fmt"
 
 // RunIntCodeProgram runs an intcode program
-func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
+func RunIntCodeProgram(programInt []int, input chan int, output chan int, message chan Message) {
 
 	// Use maps instead of int arrays
 	program := make(map[int]int)
@@ -36,10 +36,16 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
 			break
 		case 3:
 			//fmt.Println("Waiting for input")
+			if message != nil {
+				message <- Message{MessageType: 0}
+			}
 			placeParam(program, paramModes, 0, opCodeI, relativeBase, <-input)
 			opCodeI = opCodeI + 2
 			break
 		case 4:
+			if message != nil {
+				message <- Message{MessageType: 1}
+			}
 			param1 := getOneParams(program, paramModes, opCodeI, relativeBase)
 			//fmt.Println("The output is", param1)
 			output <- param1
@@ -106,7 +112,7 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int) {
 
 // RunIntCodeProgramWaitForTermination runs an intcode program then sends a true signal to the t channel
 func RunIntCodeProgramWaitForTermination(program []int, input chan int, output chan int, t chan bool) {
-	RunIntCodeProgram(program, input, output)
+	RunIntCodeProgram(program, input, output, nil)
 	t <- true
 }
 
@@ -168,4 +174,11 @@ func placeParam(program map[int]int, paramModes [3]int, outputParam int, opCodeI
 	} else if paramModes[outputParam] == 2 {
 		program[program[opCodeI+outputParam+1]+relativeBase] = value
 	}
+}
+
+// Message is used to signal whether the intcode computer is waiting for input or waiting for output
+// We can use this to decide whether to send input or take output from the program
+// MessageTypes are 0 for input, 1 for output
+type Message struct {
+	MessageType int
 }

@@ -17,17 +17,17 @@ func main() {
 
 	switch *methodP {
 	case "p1":
-		PartOne()
+		partOne()
 		break
 	case "p2":
-		PartTwo()
+		partTwo()
 		break
 	case "test":
 		break
 	}
 }
 
-func PartOne() {
+func partOne() {
 	//input := readInput()
 	// Get Min and Max ranges for password
 	input := "307237-769058"
@@ -81,7 +81,7 @@ func checkAscending(i int) bool {
 	return true
 }
 
-func PartTwo() {
+func partTwo() {
 	//input := readInput()
 	// Get Min and Max ranges for password
 	input := "307237-769058"

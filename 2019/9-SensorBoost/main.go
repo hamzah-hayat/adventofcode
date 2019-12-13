@@ -37,7 +37,7 @@ func partOne() {
 	// Second channel is for output
 	outputChan := make(chan int)
 
-	go intcode.RunIntCodeProgram(program, inputChan, outputChan)
+	go intcode.RunIntCodeProgram(program, inputChan, outputChan, nil)
 
 	// Run computer in test mode
 	inputChan <- 1
@@ -54,7 +54,7 @@ func partTwo() {
 	// Second channel is for output
 	outputChan := make(chan int)
 
-	go intcode.RunIntCodeProgram(program, inputChan, outputChan)
+	go intcode.RunIntCodeProgram(program, inputChan, outputChan, nil)
 
 	// Run computer in test mode
 	inputChan <- 2

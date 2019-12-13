@@ -91,31 +91,31 @@ func runRocketsWithSignals(program []int, signalSet []int) int {
 	// Second channel is for output
 	output := make(chan int)
 
-	go intcode.RunIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output, nil)
 	input <- signalSet[0]
 	input <- 0
 
 	out := <-output
 
-	go intcode.RunIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output, nil)
 	input <- signalSet[1]
 	input <- out
 
 	out = <-output
 
-	go intcode.RunIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output, nil)
 	input <- signalSet[2]
 	input <- out
 
 	out = <-output
 
-	go intcode.RunIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output, nil)
 	input <- signalSet[3]
 	input <- out
 
 	out = <-output
 
-	go intcode.RunIntCodeProgram(program, input, output)
+	go intcode.RunIntCodeProgram(program, input, output, nil)
 	input <- signalSet[4]
 	input <- out
 

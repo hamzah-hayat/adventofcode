@@ -16,17 +16,17 @@ func main() {
 
 	switch *methodP {
 	case "p1":
-		PartOne()
+		partOne()
 		break
 	case "p2":
-		PartTwo()
+		partTwo()
 		break
 	case "test":
 		break
 	}
 }
 
-func PartOne() {
+func partOne() {
 	input := readInput()
 
 	grid1 := make(map[point]bool)
@@ -109,7 +109,7 @@ func moveGrid(moveDir string, moveDist int, grid map[point]bool, currentPoint *p
 	}
 }
 
-func PartTwo() {
+func partTwo() {
 	input := readInput()
 
 	grid1 := make(map[point]int)

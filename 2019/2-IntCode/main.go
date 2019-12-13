@@ -16,17 +16,17 @@ func main() {
 
 	switch *methodP {
 	case "p1":
-		PartOne()
+		partOne()
 		break
 	case "p2":
-		PartTwo()
+		partTwo()
 		break
 	case "test":
 		break
 	}
 }
 
-func PartOne() {
+func partOne() {
 	input := readInput()
 
 	programStr := strings.Split(input[0], ",")
@@ -73,7 +73,7 @@ func PartOne() {
 
 }
 
-func PartTwo() {
+func partTwo() {
 	input := readInput()
 
 	programStr := strings.Split(input[0], ",")
