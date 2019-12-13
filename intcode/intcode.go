@@ -111,8 +111,8 @@ func RunIntCodeProgram(programInt []int, input chan int, output chan int, messag
 }
 
 // RunIntCodeProgramWaitForTermination runs an intcode program then sends a true signal to the t channel
-func RunIntCodeProgramWaitForTermination(program []int, input chan int, output chan int, t chan bool) {
-	RunIntCodeProgram(program, input, output, nil)
+func RunIntCodeProgramWaitForTermination(program []int, input chan int, output chan int, t chan bool, message chan Message) {
+	RunIntCodeProgram(program, input, output, message)
 	t <- true
 }
 

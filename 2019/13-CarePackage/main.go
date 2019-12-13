@@ -40,8 +40,10 @@ func partOne() {
 	outputChan := make(chan int)
 	// Terimnation channel
 	t := make(chan bool)
+	// Message channel
+	message := make(chan intcode.Message)
 
-	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t, message)
 
 	screen := createGameScreen(outputChan, t)
 
@@ -103,19 +105,21 @@ func partTwo() {
 	outputChan := make(chan int)
 	// Terimnation channel
 	t := make(chan bool)
+	// Message channel
+	message := make(chan intcode.Message)
 
 	// Put some money in!
 	program[0] = 2
 
-	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t)
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, t, message)
 
-	score := playGame(inputChan, outputChan, t)
+	score := playGame(inputChan, outputChan, t, message)
 
 	fmt.Println("The score is", score)
 
 }
 
-func playGame(inputChan chan int, outputChan chan int, t chan bool) int {
+func playGame(inputChan chan int, outputChan chan int, t chan bool, message chan intcode.Message) int {
 
 	screen := make(map[space]int)
 	teriminate := false
@@ -130,42 +134,50 @@ func playGame(inputChan chan int, outputChan chan int, t chan bool) int {
 		case <-t:
 			teriminate = true
 			break
-		case x := <-outputChan:
-			y := <-outputChan
-			tileID := <-outputChan
-
-			if ballAndPaddleReady {
-				cmd := exec.Command("cmd", "/c", "cls")
-				cmd.Stdout = os.Stdout
-				cmd.Run()
-				fmt.Println(printScreen(screen))
-				time.Sleep(time.Millisecond * 50)
-				// Now move towards the ball
-				if ballX < paddleX {
-					inputChan <- -1
-				} else if ballX > paddleX {
-					inputChan <- 1
-				} else {
-					inputChan <- 0
+		case m := <-message:
+			if m.MessageType == 0 {
+				// Waiting for input
+				if ballX != -1 && paddleX != -1 && !ballAndPaddleReady {
+					ballAndPaddleReady = true
 				}
-			}
 
-			if x == -1 && y == 0 {
-				score = tileID
-				continue
-			}
+				if ballAndPaddleReady {
+					cmd := exec.Command("cmd", "/c", "cls")
+					cmd.Stdout = os.Stdout
+					cmd.Run()
+					fmt.Println(printScreen(screen))
+					time.Sleep(time.Millisecond)
+					// Now move towards the ball
+					if ballX < paddleX {
+						inputChan <- -1
+					} else if ballX > paddleX {
+						inputChan <- 1
+					} else {
+						inputChan <- 0
+					}
+				}
+			} else if m.MessageType == 1 {
+				// Giving output
+				x := <-outputChan
+				<-message
+				y := <-outputChan
+				<-message
+				tileID := <-outputChan
 
-			screen[space{x: x, y: y}] = tileID
+				if x == -1 && y == 0 {
+					score = tileID
+					continue
+				}
 
-			if tileID == tIDBall {
-				ballX = x
-			}
-			if tileID == tIDPaddle {
-				paddleX = x
-			}
+				screen[space{x: x, y: y}] = tileID
 
-			if ballX != -1 && paddleX != -1 && !ballAndPaddleReady {
-				ballAndPaddleReady = true
+				if tileID == tIDBall {
+					ballX = x
+				}
+				if tileID == tIDPaddle {
+					paddleX = x
+				}
+
 			}
 		}
 
