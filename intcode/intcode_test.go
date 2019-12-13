@@ -16,7 +16,7 @@ func TestIntCode_EqualTo8_True_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 8
 	result := <-output
 
@@ -36,7 +36,7 @@ func TestIntCode_EqualTo8_False_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 10
 	result := <-output
 
@@ -56,7 +56,7 @@ func TestIntCode_LessThan8_True_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 3
 	result := <-output
 
@@ -76,7 +76,7 @@ func TestIntCode_LessThan8_False_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 10
 	result := <-output
 
@@ -96,7 +96,7 @@ func TestIntCode_EqualTo8_True_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 8
 	result := <-output
 
@@ -116,7 +116,7 @@ func TestIntCode_EqualTo8_False_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 3
 	result := <-output
 
@@ -136,7 +136,7 @@ func TestIntCode_LessThan8_True_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 3
 	result := <-output
 
@@ -156,7 +156,7 @@ func TestIntCode_LessThan8_False_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 12
 	result := <-output
 
@@ -176,7 +176,7 @@ func TestIntCode_CheckZero_False_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 0
 	result := <-output
 
@@ -196,7 +196,7 @@ func TestIntCode_CheckZero_True_Position(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 31
 	result := <-output
 
@@ -216,7 +216,7 @@ func TestIntCode_CheckZero_False_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 0
 	result := <-output
 
@@ -236,7 +236,7 @@ func TestIntCode_CheckZero_True_Immediate(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 31
 	result := <-output
 
@@ -256,7 +256,7 @@ func TestIntCode_CheckNumberAgainst8_Lower(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 3
 	result := <-output
 
@@ -276,7 +276,7 @@ func TestIntCode_CheckNumberAgainst8_Equal(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 8
 	result := <-output
 
@@ -296,7 +296,7 @@ func TestIntCode_CheckNumberAgainst8_Greater(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 12
 	result := <-output
 
@@ -318,7 +318,7 @@ func TestIntCode_RelativeMode_Simple(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	input <- 99
 	result := <-output
 
@@ -340,7 +340,7 @@ func TestIntCode_PrintLargeNumber(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	result := <-output
 
 	if expected != result {
@@ -359,7 +359,7 @@ func TestIntCode_LargeMemorySpace(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	result := <-output
 
 	if expected != result {
@@ -378,7 +378,7 @@ func TestIntCode_Print16DigitNumber(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 	result := <-output
 
 	if expected != result {
@@ -397,7 +397,7 @@ func TestIntCode_ProduceCopyOfSelf(t *testing.T) {
 	// Second channel is for output
 	output := make(chan int)
 
-	go RunIntCodeProgram(program, input, output)
+	go RunIntCodeProgram(program, input, output, nil)
 
 	var result [16]int
 	for i := 0; i < 15; i++ {
