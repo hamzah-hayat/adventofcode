@@ -5,8 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hamzah-hayat/adventofcode/intcode"
 )
@@ -96,9 +98,9 @@ func partTwo() {
 	program := convertToInts(input)
 
 	// First channel is for input
-	inputChan := make(chan int, 100)
+	inputChan := make(chan int)
 	// Second channel is for output
-	outputChan := make(chan int, 100)
+	outputChan := make(chan int)
 	// Terimnation channel
 	t := make(chan bool)
 
@@ -115,6 +117,7 @@ func partTwo() {
 
 func playGame(inputChan chan int, outputChan chan int, t chan bool) int {
 
+	screen := make(map[space]int)
 	teriminate := false
 	ballAndPaddleReady := false
 	score := 0
@@ -131,10 +134,28 @@ func playGame(inputChan chan int, outputChan chan int, t chan bool) int {
 			y := <-outputChan
 			tileID := <-outputChan
 
+			if ballAndPaddleReady {
+				cmd := exec.Command("cmd", "/c", "cls")
+				cmd.Stdout = os.Stdout
+				cmd.Run()
+				fmt.Println(printScreen(screen))
+				time.Sleep(time.Millisecond * 50)
+				// Now move towards the ball
+				if ballX < paddleX {
+					inputChan <- -1
+				} else if ballX > paddleX {
+					inputChan <- 1
+				} else {
+					inputChan <- 0
+				}
+			}
+
 			if x == -1 && y == 0 {
 				score = tileID
 				continue
 			}
+
+			screen[space{x: x, y: y}] = tileID
 
 			if tileID == tIDBall {
 				ballX = x
@@ -145,17 +166,6 @@ func playGame(inputChan chan int, outputChan chan int, t chan bool) int {
 
 			if ballX != -1 && paddleX != -1 && !ballAndPaddleReady {
 				ballAndPaddleReady = true
-			}
-
-			if ballAndPaddleReady {
-				// Now move towards the ball
-				if ballX < paddleX {
-					inputChan <- -1
-				} else if ballX > paddleX {
-					inputChan <- 1
-				} else {
-					inputChan <- 0
-				}
 			}
 		}
 
@@ -178,6 +188,37 @@ func findObject(screen map[space]int, tID int) space {
 
 	// Cant find this object
 	return space{x: -1, y: -1}
+}
+
+func printScreen(screen map[space]int) string {
+	// Find the xMin,xMax and ymin,yMax
+	// Hardcode these for now
+	xMin := 0
+	xMax := 23
+	yMin := 0
+	yMax := 50
+
+	// now print the grid
+	picture := ""
+	for i := xMin; i < xMax; i++ {
+		for j := yMin; j < yMax; j++ {
+			switch screen[space{x: j, y: i}] {
+			case 0:
+				picture += " "
+			case 1:
+				picture += "|"
+			case 2:
+				picture += "█"
+			case 3:
+				picture += "_"
+			case 4:
+				picture += "O"
+			}
+		}
+		picture += "\n"
+	}
+
+	return picture
 }
 
 // Read data from input.txt
