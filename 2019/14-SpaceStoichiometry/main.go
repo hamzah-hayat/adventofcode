@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -54,23 +54,23 @@ func createReactions(input []string) []reaction {
 		splitReaction := strings.Split(val, "=>")
 
 		// Get the ingredients
-		var ingredients []chemical
+		ingredients := make(map[string]int)
 		for _, valI := range strings.Split(splitReaction[0], ",") {
 			trimed := strings.Trim(valI, " ")
 			finalSplit := strings.Split(trimed, " ")
 			i, _ := strconv.Atoi(finalSplit[0])
 			chemName := finalSplit[1]
-			ingredients = append(ingredients, chemical{number: i, name: chemName})
+			ingredients[chemName] = i
 		}
 
 		// Get the results
-		var results []chemical
+		results := make(map[string]int)
 		for _, valI := range strings.Split(splitReaction[1], ",") {
 			trimed := strings.Trim(valI, " ")
 			finalSplit := strings.Split(trimed, " ")
 			i, _ := strconv.Atoi(finalSplit[0])
 			chemName := finalSplit[1]
-			results = append(results, chemical{number: i, name: chemName})
+			results[chemName] = i
 		}
 
 		reactionList = append(reactionList, reaction{ingredients: ingredients, results: results})
@@ -83,7 +83,23 @@ func createReactions(input []string) []reaction {
 func convertOreToFuel(reactionList []reaction) int {
 	oreNeeded := 0
 
+	// start with what I want
+	wantedChemicals := chemicalsNeededForResult(reactionList, "FUEL")
+
 	return oreNeeded
+}
+
+func chemicalsNeededForResult(reactionList []reaction, chemName string) map[string]int {
+	var wantedChemicals map[string]int
+	for _, val := range reactionList {
+		for i := range val.results {
+			if i == chemName {
+				wantedChemicals = val.ingredients
+			}
+		}
+
+	}
+	return wantedChemicals
 }
 
 func partTwo() {
@@ -91,13 +107,8 @@ func partTwo() {
 }
 
 type reaction struct {
-	ingredients []chemical
-	results     []chemical
-}
-
-type chemical struct {
-	number int
-	name   string
+	ingredients map[string]int
+	results     map[string]int
 }
 
 // Read data from input.txt
