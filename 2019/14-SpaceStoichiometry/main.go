@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -83,27 +83,36 @@ func createReactions(input []string) []reaction {
 func convertOreToFuel(reactionList []reaction, fuelNeeded int) int {
 
 	// start with what I want, aka a set amount of fuel
-	wantedChemicals := chemicalsNeededForResult(reactionList, fuelNeeded, "FUEL")
+	wantedChemicals, _ := chemicalsNeededForResult(reactionList, fuelNeeded, "FUEL")
 
 	// now, work backwards and find the wanted chems for each method, untill we only have ore
-	for len(wantedChemicals) != 1 {
+	for {
+		changed := false
 		for chemName, chemNeeded := range wantedChemicals {
-			if chemName == "ORE" {
+			if chemName == "ORE" || chemNeeded < 0 {
 				continue
 			}
-			newWantedChemicals := chemicalsNeededForResult(reactionList, chemNeeded, chemName)
+			newWantedChemicals, chemsOutputted := chemicalsNeededForResult(reactionList, chemNeeded, chemName)
+			newWantedChemicals[chemName] = -chemsOutputted
 
 			// Merge this new list with our old list
 			wantedChemicals = mergeMaps(wantedChemicals, newWantedChemicals)
-			delete(wantedChemicals, chemName)
+			if wantedChemicals[chemName] == 0 {
+				delete(wantedChemicals, chemName)
+			}
+			changed = true
+		}
+		if !changed {
+			break
 		}
 	}
 
 	return wantedChemicals["ORE"]
 }
 
-func chemicalsNeededForResult(reactionList []reaction, numNeeded int, chemName string) map[string]int {
+func chemicalsNeededForResult(reactionList []reaction, numNeeded int, chemName string) (map[string]int, int) {
 	wantedChemicals := make(map[string]int)
+	chemsProduced := 0
 	for _, val := range reactionList {
 		for i, val2 := range val.results {
 			if i == chemName {
@@ -112,6 +121,7 @@ func chemicalsNeededForResult(reactionList []reaction, numNeeded int, chemName s
 				if numNeeded%val2 > 0 {
 					multiplier++
 				}
+				chemsProduced = multiplier * val2
 				for i2, val3 := range val.ingredients {
 					wantedChemicals[i2] = val3 * multiplier
 				}
@@ -119,7 +129,7 @@ func chemicalsNeededForResult(reactionList []reaction, numNeeded int, chemName s
 		}
 
 	}
-	return wantedChemicals
+	return wantedChemicals, chemsProduced
 }
 
 func mergeMaps(a map[string]int, b map[string]int) map[string]int {
@@ -134,7 +144,26 @@ func mergeMaps(a map[string]int, b map[string]int) map[string]int {
 }
 
 func partTwo() {
-	//input := readInput()
+	input := readInput()
+
+	// Create reactions list
+	reactionList := createReactions(input)
+
+	oreNeededForFuel := 0
+	fuelTest := 2876992
+	for {
+		oreNeededForFuel = convertOreToFuel(reactionList, fuelTest)
+		// Found an upper limit
+		if oreNeededForFuel > 1000000000000 {
+			fuelTest--
+			break
+		}
+		fuelTest++
+		fmt.Println("Ore needed is", oreNeededForFuel)
+		fmt.Println("Fuel Produced is", fuelTest)
+	}
+
+	fmt.Println("The amount of fuel that can be created with a trillion ore is", fuelTest)
 }
 
 type reaction struct {
