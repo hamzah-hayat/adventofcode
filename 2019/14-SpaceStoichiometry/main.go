@@ -32,7 +32,7 @@ func partOne() {
 	// Create reactions list
 	reactionList := createReactions(input)
 
-	oreNeededForFuel := convertOreToFuel(reactionList)
+	oreNeededForFuel := convertOreToFuel(reactionList, 1)
 
 	fmt.Println("The amount of ore needed for 1 fuel is", oreNeededForFuel)
 }
@@ -80,26 +80,57 @@ func createReactions(input []string) []reaction {
 	return reactionList
 }
 
-func convertOreToFuel(reactionList []reaction) int {
-	oreNeeded := 0
+func convertOreToFuel(reactionList []reaction, fuelNeeded int) int {
 
-	// start with what I want
-	wantedChemicals := chemicalsNeededForResult(reactionList, "FUEL")
+	// start with what I want, aka a set amount of fuel
+	wantedChemicals := chemicalsNeededForResult(reactionList, fuelNeeded, "FUEL")
 
-	return oreNeeded
+	// now, work backwards and find the wanted chems for each method, untill we only have ore
+	for len(wantedChemicals) != 1 {
+		for chemName, chemNeeded := range wantedChemicals {
+			if chemName == "ORE" {
+				continue
+			}
+			newWantedChemicals := chemicalsNeededForResult(reactionList, chemNeeded, chemName)
+
+			// Merge this new list with our old list
+			wantedChemicals = mergeMaps(wantedChemicals, newWantedChemicals)
+			delete(wantedChemicals, chemName)
+		}
+	}
+
+	return wantedChemicals["ORE"]
 }
 
-func chemicalsNeededForResult(reactionList []reaction, chemName string) map[string]int {
-	var wantedChemicals map[string]int
+func chemicalsNeededForResult(reactionList []reaction, numNeeded int, chemName string) map[string]int {
+	wantedChemicals := make(map[string]int)
 	for _, val := range reactionList {
-		for i := range val.results {
+		for i, val2 := range val.results {
 			if i == chemName {
-				wantedChemicals = val.ingredients
+				// Check how many times we need this
+				multiplier := numNeeded / val2
+				if numNeeded%val2 > 0 {
+					multiplier++
+				}
+				for i2, val3 := range val.ingredients {
+					wantedChemicals[i2] = val3 * multiplier
+				}
 			}
 		}
 
 	}
 	return wantedChemicals
+}
+
+func mergeMaps(a map[string]int, b map[string]int) map[string]int {
+	newMap := make(map[string]int)
+	for k, v := range a {
+		newMap[k] += v
+	}
+	for k, v := range b {
+		newMap[k] += v
+	}
+	return newMap
 }
 
 func partTwo() {
