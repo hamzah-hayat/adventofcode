@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 )
 
@@ -73,12 +74,20 @@ func TestFlawedFrequency_TestPhaseLarge0(t *testing.T) {
 	phase := convertToInts(input)
 
 	phase = multiplyPhases(phase, 10000)
-	offset := getPhaseOffset(phase)
+	offset := 303673
 
-	outputNumbers := runPhases(phase, 100)
+	finalPhase := runPhasesFastWithMoreThanHalfOffset(phase[offset:], 100)
 
-	if expected != string(outputNumbers[99][0+offset:8+offset]) {
-		t.Error(fmt.Sprint("Exected output ", expected, " but got ", string(outputNumbers[99][0+offset:8+offset])))
+	// Convert final Phase into string
+	finalPhaseStr := ""
+	for i := len(finalPhase) - 1; i > 0; i-- {
+		finalPhaseStr += strconv.Itoa(finalPhase[i])
+	}
+
+	fmt.Println("The first eight digits of the 100th phase (with offset) are:", finalPhaseStr[0:8])
+
+	if expected != finalPhaseStr[0:8] {
+		t.Error(fmt.Sprint("Exected output ", expected, " but got ", finalPhaseStr[0:8]))
 	}
 
 }

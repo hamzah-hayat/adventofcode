@@ -11,7 +11,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -41,12 +41,11 @@ func runPhases(phase []int, runAmount int) []string {
 		newPhase := make([]int, len(phase))
 		for i := 0; i < len(phase); i++ {
 			// Build Base Pattern
-			basePattern := buildBasePattern(i + 1)
 			// Ignore the first element of the pattern
 			patternNum := 1
 			outputNum := 0
 			for _, val := range phase {
-				outputNum += val * basePattern[patternNum%len(basePattern)] // multiply with pattern number
+				outputNum += val * basePattern(i+1, patternNum)
 				patternNum++
 			}
 			outputNum = abs(outputNum) % 10 //make positive and single digit
@@ -62,6 +61,29 @@ func runPhases(phase []int, runAmount int) []string {
 	}
 
 	return output
+}
+
+func basePattern(i, patterNum int) int {
+
+	patterNum = patterNum % (i * 4)
+
+	if patterNum >= 3*i {
+		return -1
+	}
+
+	if patterNum >= 2*i {
+		return 0
+	}
+
+	if patterNum >= i {
+		return 1
+	}
+
+	if patterNum < i {
+		return 0
+	}
+
+	return 0
 }
 
 func buildBasePattern(runAmount int) []int {
@@ -89,17 +111,62 @@ func partTwo() {
 	phase = multiplyPhases(phase, 10000)
 	offset := getPhaseOffset(phase)
 
-	outputNumbers := runPhases(phase, 100)
+	finalPhase := runPhasesFastWithMoreThanHalfOffset(phase[offset:], 100)
 
-	fmt.Println("The first eight digits of the 100th phase (with offset) are:", string(outputNumbers[99][0+offset:8+offset]))
+	// Convert final Phase into string
+	finalPhaseStr := ""
+	for i := len(finalPhase) - 1; i > 0; i-- {
+		finalPhaseStr += strconv.Itoa(finalPhase[i])
+	}
+
+	fmt.Println("The first eight digits of the 100th phase (with offset) are:", finalPhaseStr[0:8])
+
+}
+
+func runPhasesFastWithMoreThanHalfOffset(phases []int, runAmount int) []int {
+
+	// Since we started from more then halfway, we can reverse the list and add each number sequentially
+	// This will give us each correct digit from the last digit to the offset digit
+	// This counts as a full phase
+	// we can then keep going this
+	phases = reverseArray(phases)
+	finalPhase := phases
+
+	for run := 0; run < runAmount; run++ {
+		newPhase := make([]int, len(phases))
+		sum := 0
+		for i := 0; i < len(phases); i++ {
+			// Since we start from the back, we can just sum
+			sum += phases[i]
+			// This is a correct digit
+			newPhase[i] = sum % 10
+			sum = sum % 10
+		}
+		phases = newPhase
+		finalPhase = phases
+	}
+
+	return finalPhase
+}
+
+func reverseArray(arr []int) []int {
+	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
+	return arr
+}
+
+func reverseArrayStr(arr []string) []string {
+	for i, j := 0, len(arr)-1; i < j; i, j = i+1, j-1 {
+		arr[i], arr[j] = arr[j], arr[i]
+	}
+	return arr
 }
 
 func multiplyPhases(phases []int, multiplyNum int) []int {
 	newPhases := make([]int, len(phases)*multiplyNum)
-	for i := 0; i < multiplyNum; i++ {
-		for j := 0; j < len(phases); j++ {
-			newPhases[j*(i+1)] = phases[j]
-		}
+	for i := 0; i < len(phases)*multiplyNum; i++ {
+		newPhases[i] = phases[i%len(phases)]
 	}
 	return newPhases
 }
