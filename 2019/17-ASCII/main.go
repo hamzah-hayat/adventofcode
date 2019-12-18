@@ -38,8 +38,15 @@ func partOne() {
 
 	cameraView := buildCameraView(outputChan, terminateChan)
 
-	fmt.Println(printCamera(cameraView))
+	intersections := findIntersections(cameraView)
 
+	total := 0
+
+	for _, s := range intersections {
+		total += (s.x) * (s.y)
+	}
+
+	fmt.Println("The total sum of the alignment parameters is", total)
 }
 
 func buildCameraView(outputChan chan int, terminateChan chan bool) map[space]string {
@@ -55,12 +62,12 @@ func buildCameraView(outputChan chan int, terminateChan chan bool) map[space]str
 			break
 		case input := <-outputChan:
 			if input == 10 {
-				y++
-				x = 0
+				x++
+				y = 0
 				break
 			} else {
 				cameraView[space{x: x, y: y}] = string(input)
-				x++
+				y++
 				break
 			}
 		}
@@ -72,6 +79,27 @@ func buildCameraView(outputChan chan int, terminateChan chan bool) map[space]str
 	return cameraView
 }
 
+func findIntersections(cameraView map[space]string) []space {
+
+	intersections := make([]space, 0)
+	for i, val := range cameraView {
+
+		if val == "#" {
+			x := i.x
+			y := i.y
+
+			intersection := cameraView[space{x: x + 1, y: y}] == "#" && cameraView[space{x: x - 1, y: y}] == "#" && cameraView[space{x: x, y: y + 1}] == "#" && cameraView[space{x: x, y: y - 1}] == "#"
+
+			if intersection {
+				intersections = append(intersections, i)
+			}
+
+		}
+
+	}
+	return intersections
+}
+
 func printCamera(cameraView map[space]string) string {
 	cameraViewStr := ""
 
@@ -80,10 +108,10 @@ func printCamera(cameraView map[space]string) string {
 	maxY := 0
 	for s := range cameraView {
 		if s.x > maxX {
-			maxX = s.x
+			maxX = s.x + 1
 		}
 		if s.y > maxY {
-			maxY = s.y
+			maxY = s.y + 1
 		}
 	}
 
@@ -91,12 +119,24 @@ func printCamera(cameraView map[space]string) string {
 		for j := 0; j < maxY; j++ {
 			cameraViewStr += cameraView[space{x: i, y: j}]
 		}
+		cameraViewStr += "\n"
 	}
 	return cameraViewStr
 }
 
 func partTwo() {
-	//input := readInput()
+	input := readInput()
+	program := convertToInts(input)
+
+	inputChan, outputChan, terminateChan, _ := makeChannels()
+
+	go intcode.RunIntCodeProgramWaitForTermination(program, inputChan, outputChan, terminateChan, nil)
+
+	cameraView := buildCameraView(outputChan, terminateChan)
+
+	// try to pathfind on scaffold to end
+
+	fmt.Println(printCamera(cameraView))
 }
 
 type space struct {
