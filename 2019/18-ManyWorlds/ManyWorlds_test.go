@@ -18,6 +18,8 @@ func TestManyWorlds_MazeSmall1(t *testing.T) {
 
 	lowestSteps := solveMaze(maze)
 
+	fmt.Println(solveCalls)
+
 	if expected != lowestSteps {
 		t.Error(fmt.Sprint("Exected output ", expected, " but got ", lowestSteps))
 	}
@@ -39,6 +41,8 @@ func TestManyWorlds_MazeSmall2(t *testing.T) {
 
 	lowestSteps := solveMaze(maze)
 
+	fmt.Println(solveCalls)
+
 	if expected != lowestSteps {
 		t.Error(fmt.Sprint("Exected output ", expected, " but got ", lowestSteps))
 	}
@@ -59,6 +63,8 @@ func TestManyWorlds_MazeSmall3(t *testing.T) {
 	maze := createMaze(input)
 
 	lowestSteps := solveMaze(maze)
+
+	fmt.Println(solveCalls)
 
 	if expected != lowestSteps {
 		t.Error(fmt.Sprint("Exected output ", expected, " but got ", lowestSteps))
@@ -85,6 +91,8 @@ func TestManyWorlds_MazeSmall4(t *testing.T) {
 
 	lowestSteps := solveMaze(maze)
 
+	fmt.Println(solveCalls)
+
 	if expected != lowestSteps {
 		t.Error(fmt.Sprint("Exected output ", expected, " but got ", lowestSteps))
 	}
@@ -106,6 +114,8 @@ func TestManyWorlds_MazeSmall5(t *testing.T) {
 	maze := createMaze(input)
 
 	lowestSteps := solveMaze(maze)
+
+	fmt.Println(solveCalls)
 
 	if expected != lowestSteps {
 		t.Error(fmt.Sprint("Exected output ", expected, " but got ", lowestSteps))

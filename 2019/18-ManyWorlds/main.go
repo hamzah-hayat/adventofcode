@@ -76,6 +76,8 @@ func makeMazeObject(character rune) mazeObject {
 	return mazeObject{char: string(character), objectType: 4}
 }
 
+var solveCalls int
+
 func solveMaze(maze map[space]mazeObject) int {
 
 	// Find the entrance
@@ -85,12 +87,14 @@ func solveMaze(maze map[space]mazeObject) int {
 			entranceSpace = i
 		}
 	}
+	solveCalls = 0
 
 	return findShortestPathToGetAllKeys(maze, entranceSpace, 0)
 }
 
 // Find all keys
 func findShortestPathToGetAllKeys(maze map[space]mazeObject, currentSpace space, pathlength int) int {
+	solveCalls++
 
 	// Copy the Maze
 	newMaze := make(map[space]mazeObject)
@@ -105,6 +109,9 @@ func findShortestPathToGetAllKeys(maze map[space]mazeObject, currentSpace space,
 			doorSpace := findDoorForKey(newMaze, k)
 			delete(newMaze, doorSpace) // delete the door
 			delete(newMaze, i)         // delete the key
+			// Add an empty space at each location
+			newMaze[doorSpace] = mazeObject{char: ".", objectType: 0}
+			newMaze[i] = mazeObject{char: ".", objectType: 0}
 		}
 	}
 
