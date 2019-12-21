@@ -107,10 +107,10 @@ func printCamera(cameraView map[space]string) string {
 	maxX := 0
 	maxY := 0
 	for s := range cameraView {
-		if s.x > maxX {
+		if s.x+1 > maxX {
 			maxX = s.x + 1
 		}
-		if s.y > maxY {
+		if s.y+1 > maxY {
 			maxY = s.y + 1
 		}
 	}
@@ -136,11 +136,92 @@ func partTwo() {
 
 	// try to pathfind on scaffold to end
 
+	moves := solveMaze(cameraView)
+
+	for _, val := range moves {
+		fmt.Println(val.toString())
+	}
+
 	fmt.Println(printCamera(cameraView))
+}
+
+func solveMaze(cameraView map[space]string) []move {
+	moves := make([]move, 0)
+
+	currentSpace := space{x: 0, y: 0}
+	direction := 0 // directions are 0,1,2,3 for north,east,south,west
+
+	// Find starting space
+	for i, val := range cameraView {
+		if val == "^" {
+			currentSpace = i
+		}
+	}
+
+	for {
+		fowardSpace := getTileInDirection(cameraView, currentSpace, direction)
+		leftSpace := getTileInDirection(cameraView, currentSpace, mod(direction-1, 4))
+		rightSpace := getTileInDirection(cameraView, currentSpace, mod(direction+1, 4))
+
+		// starting from the direciton we are facing, are we at the end?
+		if cameraView[fowardSpace] == "." && cameraView[leftSpace] == "." && cameraView[rightSpace] == "." {
+			break
+		}
+
+		// If not, try to turn and go forward
+		if(cameraView[leftSpace] == "#"){
+			// Turn left
+			
+		}
+
+	}
+
+	return moves
+}
+
+func getTileInDirection(cameraView map[space]string, currentSpace space, direction int) space {
+
+	tile := space{}
+
+	switch direction {
+	case 0:
+		tile = space{x: currentSpace.x, y: currentSpace.y - 1}
+		break
+	case 1:
+		tile = space{x: currentSpace.x + 1, y: currentSpace.y}
+		break
+	case 2:
+		tile = space{x: currentSpace.x, y: currentSpace.y + 1}
+		break
+	case 3:
+		tile = space{x: currentSpace.x - 1, y: currentSpace.y}
+		break
+	}
+
+	return tile
+
+}
+
+func (m move) toString() string {
+	lengthStr := strconv.Itoa(m.length)
+	return m.turn + "," + lengthStr
+}
+
+type move struct {
+	turn   string
+	length int
 }
 
 type space struct {
 	x, y int
+}
+
+func mod(d, m int) int {
+	var res int = d % m
+	if (res < 0 && m > 0) || (res > 0 && m < 0) {
+		return res + m
+	}
+	return res
 }
 
 // Read data from input.txt
