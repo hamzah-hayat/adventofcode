@@ -13,7 +13,7 @@ import (
 
 func main() {
 	// Use Flags to run a part
-	methodP := flag.String("method", "p1", "The method/part that should be run, valid are p1,p2 and test")
+	methodP := flag.String("method", "p2", "The method/part that should be run, valid are p1,p2 and test")
 	flag.Parse()
 
 	switch *methodP {
@@ -115,9 +115,9 @@ func printCamera(cameraView map[space]string) string {
 		}
 	}
 
-	for i := 0; i < maxX; i++ {
-		for j := 0; j < maxY; j++ {
-			cameraViewStr += cameraView[space{x: i, y: j}]
+	for y := 0; y < maxY; y++ {
+		for x := 0; x < maxX; x++ {
+			cameraViewStr += cameraView[space{x: x, y: y}]
 		}
 		cameraViewStr += "\n"
 	}
@@ -135,18 +135,16 @@ func partTwo() {
 	cameraView := buildCameraView(outputChan, terminateChan)
 
 	// try to pathfind on scaffold to end
+	fmt.Println(printCamera(cameraView))
 
 	moves := solveMaze(cameraView)
 
-	for _, val := range moves {
-		fmt.Println(val.toString())
-	}
-
-	fmt.Println(printCamera(cameraView))
+	fmt.Println(moves)
 }
 
-func solveMaze(cameraView map[space]string) []move {
-	moves := make([]move, 0)
+func solveMaze(cameraView map[space]string) string {
+	moves := ""
+	moveLength := 0
 
 	currentSpace := space{x: 0, y: 0}
 	direction := 0 // directions are 0,1,2,3 for north,east,south,west
@@ -159,21 +157,37 @@ func solveMaze(cameraView map[space]string) []move {
 	}
 
 	for {
-		fowardSpace := getTileInDirection(cameraView, currentSpace, direction)
+		forwardSpace := getTileInDirection(cameraView, currentSpace, direction)
 		leftSpace := getTileInDirection(cameraView, currentSpace, mod(direction-1, 4))
 		rightSpace := getTileInDirection(cameraView, currentSpace, mod(direction+1, 4))
 
 		// starting from the direciton we are facing, are we at the end?
-		if cameraView[fowardSpace] == "." && cameraView[leftSpace] == "." && cameraView[rightSpace] == "." {
+		if cameraView[forwardSpace] == "." && cameraView[leftSpace] == "." && cameraView[rightSpace] == "." {
+			moves += strconv.Itoa(moveLength)
 			break
 		}
 
-		// If not, try to turn and go forward
-		if(cameraView[leftSpace] == "#"){
-			// Turn left
-			
+		// Try to move forward
+		if cameraView[forwardSpace] == "#" {
+			moveLength++
+			currentSpace = forwardSpace
+			continue
 		}
 
+		// If not, try to turn and go forward
+		if cameraView[leftSpace] == "#" {
+			moves += strconv.Itoa(moveLength) + "," + "L" + ","
+			moveLength = 1
+			// Turn left
+			direction = mod(direction-1, 4)
+			currentSpace = leftSpace
+		} else if cameraView[rightSpace] == "#" {
+			moves += strconv.Itoa(moveLength) + "," + "R" + ","
+			moveLength = 1
+			// Turn Right
+			direction = mod(direction+1, 4)
+			currentSpace = rightSpace
+		}
 	}
 
 	return moves
@@ -200,16 +214,6 @@ func getTileInDirection(cameraView map[space]string, currentSpace space, directi
 
 	return tile
 
-}
-
-func (m move) toString() string {
-	lengthStr := strconv.Itoa(m.length)
-	return m.turn + "," + lengthStr
-}
-
-type move struct {
-	turn   string
-	length int
 }
 
 type space struct {
