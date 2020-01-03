@@ -29,15 +29,18 @@ func main() {
 func partOne() {
 	input := readInput()
 
-	deck := makeDeck(10006)
+	deck := makeDeck(10007)
 
 	deck = runHand(input, deck)
 
+	pos := 0
 	for i, val := range deck {
-		if val == -1 {
-			fmt.Println(i, ":", val)
+		if val == 2019 {
+			pos = i
 		}
 	}
+
+	fmt.Println("The position of card 2019 is", pos)
 
 }
 

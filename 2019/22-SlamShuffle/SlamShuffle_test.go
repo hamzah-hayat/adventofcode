@@ -188,12 +188,12 @@ func TestSlamShuffle_MultipleShuffles4(t *testing.T) {
 func TestSlamShuffle_TestIncrementMutlipleRuns(t *testing.T) {
 
 	input := []string{
-		"deal with increment 7",
+		"deal with increment 2",
 		"deal with increment 3",
 	}
 	expected := []int{}
 
-	deck := makeDeck(15)
+	deck := makeDeck(4)
 
 	deck = runHand(input, deck)
 
