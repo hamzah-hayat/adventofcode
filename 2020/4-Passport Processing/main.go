@@ -17,7 +17,7 @@ func main() {
 
 	switch *methodP {
 	case "p1":
-		PartTwo()
+		PartOne()
 		break
 	case "p2":
 		PartTwo()
@@ -44,7 +44,7 @@ func PartOne() {
 }
 
 func CheckValidPassportIgnoreCID(p Passport) bool {
-	if p.BirthYear == "" && p.ExpirationYear == "" && p.EyeColour == "" && p.HairColour == "" && p.Height == "" && p.IssueYear == "" && p.PassportID == "" {
+	if p.BirthYear == "" || p.ExpirationYear == "" || p.EyeColour == "" || p.HairColour == "" || p.Height == "" || p.IssueYear == "" || p.PassportID == "" {
 		return false
 	}
 	return true
