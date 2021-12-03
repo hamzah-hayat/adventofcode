@@ -35,11 +35,7 @@ func PartOne() {
 	input := readInput()
 
 	numBits := len(input[0])
-
 	sum := make([]int, numBits)
-
-	gammaRate := ""
-	epsilonRate := ""
 
 	for _, lineInput := range input {
 		for i, binaryVal := range lineInput {
@@ -49,6 +45,8 @@ func PartOne() {
 		}
 	}
 
+	gammaRate := ""
+	epsilonRate := ""
 	for _, v := range sum {
 		if v > len(input)/2 {
 			gammaRate += "1"
@@ -59,14 +57,9 @@ func PartOne() {
 		}
 	}
 
-	fmt.Println(gammaRate)
-	fmt.Println(epsilonRate)
-
 	gammaRateInt, _ := strconv.ParseInt(gammaRate, 2, 64)
 	epsilonRateInt, _ := strconv.ParseInt(epsilonRate, 2, 64)
 
-	fmt.Println(gammaRateInt)
-	fmt.Println(epsilonRateInt)
 	fmt.Println(gammaRateInt * epsilonRateInt)
 }
 
@@ -111,8 +104,6 @@ func PartTwo() {
 		}
 
 		currentBit++
-
-		//fmt.Println(currentList)
 	}
 
 	oxygenGenRating, _ := strconv.ParseInt(currentList[0], 2, 64)
@@ -152,14 +143,9 @@ func PartTwo() {
 		}
 
 		currentBit++
-
-		//fmt.Println(currentList2)
 	}
 
 	c02ScrubberRating, _ := strconv.ParseInt(currentList2[0], 2, 64)
-
-	fmt.Println(oxygenGenRating)
-	fmt.Println(c02ScrubberRating)
 
 	fmt.Println(oxygenGenRating * c02ScrubberRating)
 
