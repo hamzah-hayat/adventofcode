@@ -42,7 +42,7 @@ func PartOne() {
 	fishs = append(fishs, fish)
 
 	for i := 0; i < 80; i++ {
-		for i, _ := range fishs {
+		for i := range fishs {
 			fishs = processFishDay(i, fishs)
 		}
 		//fmt.Println("Passed day" + strconv.Itoa(i))
