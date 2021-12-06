@@ -45,10 +45,10 @@ func PartOne() {
 		for i, _ := range fishs {
 			fishs = processFishDay(i, fishs)
 		}
-		fmt.Println("Passed day" + strconv.Itoa(i))
+		//fmt.Println("Passed day" + strconv.Itoa(i))
 	}
 
-	fmt.Println(len(fishs))
+	//fmt.Println(len(fishs))
 
 	//0 = 1421
 	//1 = 1401
@@ -95,7 +95,7 @@ func PartTwo() {
 
 	for i := 0; i < 256; i++ {
 		fishs = processFishDayMap(fishs)
-		fmt.Println("Passed day" + strconv.Itoa(i))
+		//fmt.Println("Passed day" + strconv.Itoa(i))
 	}
 
 	sum := 0
