@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
+	"sync"
 )
 
 var (
@@ -110,10 +112,9 @@ type Point struct {
 }
 
 type Node struct {
-	point             Point
-	distance          int
-	distanceManhatten int
-	prev              []Node
+	point    Point
+	distance int
+	prev     []Node
 }
 
 // 1  function Dijkstra(Graph, source):
@@ -142,69 +143,54 @@ type Node struct {
 // Finds the shortest path
 func findShortestPath(goal Point, riskMap map[Point]int) int {
 
-	nodeList := []Node{}
+	dist := make(map[Point]int)
+	visited := make(map[Point]bool)
+	prev := make(map[Point]Point)
+
+	q := NodeQueue{}
+	pq := q.NewQ()
+
+	pq.Enqueue(Node{Point{0, 0}, 0, []Node{}})
 
 	for point := range riskMap {
-		if point.X == 0 && point.Y == 0 {
-			nodeList = append(nodeList, Node{point, 0, 0, []Node{}})
-		} else {
-			nodeList = append(nodeList, Node{point, 100000000, 100000000 + ManHatten(point, goal), []Node{}})
-		}
+		dist[point] = math.MaxInt64
 	}
-
-	visitedNodes := []Node{}
+	// We never "enter the starting point"
+	dist[Point{0, 0}] = 0
 
 	// while queue is not empty
-	for len(nodeList) > 0 {
+	for !pq.IsEmpty() {
 
-		currentNode := nodeList[0]
-		nodeIndex := 0
-		for i, v := range nodeList {
-			if currentNode.distanceManhatten > v.distanceManhatten {
-				currentNode = v
-				nodeIndex = i
-			}
+		n := pq.Dequeue()
+
+		if visited[n.point] {
+			continue
 		}
-		nodeList = remove(nodeList, nodeIndex)
+		visited[n.point] = true
 
 		// terminating search when reaching goal
-		if currentNode.point.X == goal.X && currentNode.point.Y == goal.Y {
+		if n.point.X == goal.X && n.point.Y == goal.Y {
+			dist[goal] = n.distance
 			break
 		}
 
-		neighbours := GetNeighbours(riskMap, currentNode.point)
+		neighbours := GetNeighbours(riskMap, n.point)
 
 		// iterating through all the vertices that we can reach from current vertex
 		for p, v := range neighbours {
-
-			inList := false
-			index := 0
-			for i, v := range nodeList {
-				if p == v.point {
-					index = i
-					inList = true
-				}
-			}
-
-			if inList {
-				newDist := currentNode.distance + v
-				if newDist < nodeList[index].distance {
-					visitedNodes = append(visitedNodes, Node{p, newDist, newDist + ManHatten(p, goal), append([]Node{}, currentNode)})
-					nodeList[index].distance = newDist
-					nodeList[index].distanceManhatten = newDist + ManHatten(p, goal)
-					nodeList[index].prev = append([]Node{}, currentNode)
+			if !visited[p] {
+				newDist := n.distance + v
+				if newDist < dist[p] {
+					prev[p] = n.point
+					pq.Enqueue(Node{p, newDist, append([]Node{}, *n)})
+					dist[n.point] = newDist
 				}
 			}
 		}
 	}
 
 	// Find goal node in VisitedNodes and return distance
-	distance := 0
-	for _, v := range visitedNodes {
-		if v.point == goal {
-			distance = v.distance
-		}
-	}
+	distance := dist[goal]
 
 	return distance
 }
@@ -270,10 +256,6 @@ func expandRiskMap(riskMap map[Point]int, length, height int) map[Point]int {
 	return expandedRiskMap
 }
 
-func ManHatten(p1, p2 Point) int {
-	return abs(p1.X - p2.X + p1.Y - p2.Y)
-}
-
 // Read data from input.txt
 // Return the string, so that we can deal with it however
 func readInput(filename string) []string {
@@ -289,15 +271,76 @@ func readInput(filename string) []string {
 	return input
 }
 
-// remove element from array
-func remove(s []Node, i int) []Node {
-	s[i] = s[len(s)-1]
-	return s[:len(s)-1]
-}
-
 func abs(i int) int {
 	if i < 0 {
 		return -i
 	}
 	return i
+}
+
+type NodeQueue struct {
+	Items []Node
+	Lock  sync.RWMutex
+}
+
+// Enqueue adds an Node to the end of the queue
+func (s *NodeQueue) Enqueue(t Node) {
+	s.Lock.Lock()
+	if len(s.Items) == 0 {
+		s.Items = append(s.Items, t)
+		s.Lock.Unlock()
+		return
+	}
+	var insertFlag bool
+	for k, v := range s.Items {
+		if t.distance < v.distance {
+			if k > 0 {
+				s.Items = append(s.Items[:k+1], s.Items[k:]...)
+				s.Items[k] = t
+				insertFlag = true
+			} else {
+				s.Items = append([]Node{t}, s.Items...)
+				insertFlag = true
+			}
+		}
+		if insertFlag {
+			break
+		}
+	}
+	if !insertFlag {
+		s.Items = append(s.Items, t)
+	}
+	//s.items = append(s.items, t)
+	s.Lock.Unlock()
+}
+
+// Dequeue removes an Node from the start of the queue
+func (s *NodeQueue) Dequeue() *Node {
+	s.Lock.Lock()
+	item := s.Items[0]
+	s.Items = s.Items[1:len(s.Items)]
+	s.Lock.Unlock()
+	return &item
+}
+
+//NewQ Creates New Queue
+func (s *NodeQueue) NewQ() *NodeQueue {
+	s.Lock.Lock()
+	s.Items = []Node{}
+	s.Lock.Unlock()
+	return s
+}
+
+// IsEmpty returns true if the queue is empty
+func (s *NodeQueue) IsEmpty() bool {
+	s.Lock.RLock()
+	defer s.Lock.RUnlock()
+	return len(s.Items) == 0
+}
+
+// Size returns the number of Nodes in the queue
+func (s *NodeQueue) Size() int {
+	s.Lock.RLock()
+	defer s.Lock.RUnlock()
+	return len(s.Items)
 }
