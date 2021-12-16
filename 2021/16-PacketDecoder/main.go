@@ -181,9 +181,9 @@ func EvaluatePacketRecursive(packet Packet) int64 {
 	case 2:
 		//min
 		var min int64
-		min = math.MaxInt
+		min = math.MaxInt64
 		for _, sp := range packet.subPackets {
-			if sp.value < int64(min) {
+			if EvaluatePacketRecursive(sp) < min {
 				min = EvaluatePacketRecursive(sp)
 			}
 		}
@@ -193,7 +193,7 @@ func EvaluatePacketRecursive(packet Packet) int64 {
 		var max int64
 		max = 0
 		for _, sp := range packet.subPackets {
-			if sp.value > int64(max) {
+			if EvaluatePacketRecursive(sp) > max {
 				max = EvaluatePacketRecursive(sp)
 			}
 		}
