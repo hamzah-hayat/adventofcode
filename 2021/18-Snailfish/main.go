@@ -61,22 +61,48 @@ func ProcessPairs(numPair NumberPair) NumberPair {
 	return numPair
 }
 
-func ExplodePairs(numPair *NumberPair, nested int) *NumberPair {
+func ExplodePairs(numPair *NumberPair, leftPair, rightPair *NumberPair, nested int) (*NumberPair, bool) {
+	explode := false
 
-	// Look for any pairs that are nested 4 times deep
-	// If there are, explode it
-	if nested != 4 {
-		numPair.X = ExplodePairs(numPair.X, nested+1)
-		numPair.Y = ExplodePairs(numPair.Y, nested+1)
-	} else {
-		// Once we are 4 in, explode
+	// Explode left first
+	if nested < 4 {
+
+		// keep going down, start by going left first
+		if numPair.X != nil {
+			rightPair = numPair.Y
+
+			numPair.X, explode = ExplodePairs(numPair.X, leftPair, rightPair, nested+1)
+			if explode {
+				return numPair, explode
+			}
+		}
+
+		if numPair.Y != nil {
+
+			leftPair = numPair.X
+
+			numPair.Y, explode = ExplodePairs(numPair.Y, leftPair, rightPair, nested+1)
+			if explode {
+				return numPair, explode
+			}
+		}
+	}
+	if nested >= 4 && numPair.X != nil && numPair.Y != nil {
+		// Once we are 4 in, start to explode
 		// First we add the X value to the pair to the left of us
 		// Then add Y value to the pair to the right of us
 		// Then replace this numberPair with 0 value
-
+		if leftPair != nil {
+			leftPair.value += numPair.X.value
+		}
+		if rightPair != nil {
+			rightPair.value += numPair.Y.value
+		}
+		numPair = &NumberPair{value: 0}
+		explode = true
 	}
 
-	return numPair
+	return numPair, explode
 }
 
 func SplitPair(numPair *NumberPair) *NumberPair {
@@ -139,20 +165,14 @@ func CreateNumberPair(input string) *NumberPair {
 	} else {
 		// We need to find the inner comma to split on
 		// count number of brackets
-
-		// leftBracketCountregex := regexp.MustCompile(`\[+`)
-		// leftBrackets := len(leftBracketCountregex.FindString(input))
-		// rightBracketCountregex := regexp.MustCompile(`\]+`)
-		// rightBrackets := len(rightBracketCountregex.FindString(Reverse(input)))
 		leftBrackets := 0
 		rightBrackets := 0
 
-		// split left
 		splitCommaIndex := 0
 		for i, c := range input {
 			if string(c) == "]" {
 				leftBrackets++
-			} else if string(c)=="["{
+			} else if string(c) == "[" {
 				rightBrackets++
 			}
 			if leftBrackets == rightBrackets {
@@ -189,12 +209,4 @@ func readInput(filename string) []string {
 		input = append(input, scanner.Text())
 	}
 	return input
-}
-
-func Reverse(s string) string {
-	r := []rune(s)
-	for i, j := 0, len(r)-1; i < len(r)/2; i, j = i+1, j-1 {
-		r[i], r[j] = r[j], r[i]
-	}
-	return string(r)
 }
