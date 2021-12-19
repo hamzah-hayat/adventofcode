@@ -38,12 +38,18 @@ func main() {
 func PartOne(filename string) string {
 	input := readInput(filename)
 
-	num := strconv.Itoa(len(input))
-
 	snailPairs := []NumberPair{}
 	for _, v := range input {
 		snailPairs = append(snailPairs, *CreateNumberPair(v))
 	}
+
+	totalPair := snailPairs[0]
+	for i := 1; i < len(snailPairs); i++ {
+		totalPair = AddPairs(totalPair, snailPairs[i])
+		ProcessPairs(&totalPair)
+	}
+	score := ScorePair(&totalPair)
+	num := strconv.Itoa(score)
 
 	return num
 }
@@ -56,63 +62,46 @@ func PartTwo(filename string) string {
 	return num
 }
 
-func ProcessPairs(numPair NumberPair) NumberPair {
+func AddPairs(pairOne NumberPair, pairTwo NumberPair) NumberPair {
+	return NumberPair{X: &pairOne, Y: &pairTwo}
+}
+
+func ProcessPairs(numPair *NumberPair) *NumberPair {
+	actionTaken := true
+
+	for actionTaken {
+		actionTaken = false
+		numPair, actionTaken = ExplodePairs(numPair)
+		if actionTaken {
+			continue
+		}
+
+		numPair, actionTaken = SplitPair(numPair)
+		if actionTaken {
+			continue
+		}
+
+	}
 
 	return numPair
 }
 
-func ExplodePairs(numPair *NumberPair, leftPair, rightPair *NumberPair, nested int) (*NumberPair, bool) {
+func ExplodePairs(numPair *NumberPair) (*NumberPair, bool) {
 	explode := false
-
-	// Explode left first
-	if nested < 4 {
-
-		// keep going down, start by going left first
-		if numPair.X != nil {
-			rightPair = numPair.Y
-
-			numPair.X, explode = ExplodePairs(numPair.X, leftPair, rightPair, nested+1)
-			if explode {
-				return numPair, explode
-			}
-		}
-
-		if numPair.Y != nil {
-
-			leftPair = numPair.X
-
-			numPair.Y, explode = ExplodePairs(numPair.Y, leftPair, rightPair, nested+1)
-			if explode {
-				return numPair, explode
-			}
-		}
-	}
-	if nested >= 4 && numPair.X != nil && numPair.Y != nil {
-		// Once we are 4 in, start to explode
-		// First we add the X value to the pair to the left of us
-		// Then add Y value to the pair to the right of us
-		// Then replace this numberPair with 0 value
-		if leftPair != nil {
-			leftPair.value += numPair.X.value
-		}
-		if rightPair != nil {
-			rightPair.value += numPair.Y.value
-		}
-		numPair = &NumberPair{value: 0}
-		explode = true
-	}
 
 	return numPair, explode
 }
 
-func SplitPair(numPair *NumberPair) *NumberPair {
+func SplitPair(numPair *NumberPair) (*NumberPair, bool) {
+	split := false
+
 	if numPair.value == 0 && numPair.X != nil {
 		// go down left
-		SplitPair(numPair.X)
+		_, split = SplitPair(numPair.X)
 	}
 	if numPair.value == 0 && numPair.Y != nil {
 		// Go down right
-		SplitPair(numPair.Y)
+		_, split = SplitPair(numPair.Y)
 	}
 
 	if numPair.value >= 10 {
@@ -126,8 +115,9 @@ func SplitPair(numPair *NumberPair) *NumberPair {
 			numPair.Y = &NumberPair{value: (numPair.value / 2) + 1}
 		}
 		numPair.value = 0
+		return numPair, true
 	}
-	return numPair
+	return numPair, split
 }
 
 // Return the score of this pair
