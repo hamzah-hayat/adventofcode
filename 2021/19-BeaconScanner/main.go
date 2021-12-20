@@ -50,10 +50,6 @@ func PartTwo(filename string) string {
 	return num
 }
 
-func ReadScanners(input []string) []Scanner{
-	
-}
-
 type Scanner struct {
 	rotation  int
 	direction int
