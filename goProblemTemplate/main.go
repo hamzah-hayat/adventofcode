@@ -27,10 +27,8 @@ func main() {
 		fmt.Println("Gold:" + PartTwo("input"))
 	case "p1":
 		fmt.Println("Silver:" + PartOne("input"))
-		break
 	case "p2":
 		fmt.Println("Gold:" + PartTwo("input"))
-		break
 	}
 }
 
