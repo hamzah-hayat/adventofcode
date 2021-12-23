@@ -71,7 +71,8 @@ func ProcessPairs(numPair *NumberPair) *NumberPair {
 
 	for actionTaken {
 		actionTaken = false
-		numPair, actionTaken = ExplodePairs(numPair)
+		var parents []*NumberPair
+		numPair, actionTaken = ExplodePairs(numPair, 0, parents)
 		if actionTaken {
 			continue
 		}
@@ -86,8 +87,44 @@ func ProcessPairs(numPair *NumberPair) *NumberPair {
 	return numPair
 }
 
-func ExplodePairs(numPair *NumberPair) (*NumberPair, bool) {
+func ExplodePairs(numPair *NumberPair, nested int, parents []*NumberPair) (*NumberPair, bool) {
 	explode := false
+
+	if nested >= 4 {
+		// Explode
+		if numPair.X != nil && numPair.Y != nil {
+			//Find left number and add left number to it
+			for i := len(parents) - 1; i > 0; i-- {
+				if parents[i].Y == numPair {
+					// Found the number
+					parents[i].X.value += numPair.X.value
+					explode = true
+				}
+			}
+
+			//Find right number and add right number tt it
+			for i := len(parents) - 1; i > 0; i-- {
+				if parents[i].X == numPair {
+					// Found the number
+					parents[i].Y.value += numPair.Y.value
+					explode = true
+				}
+			}
+			if explode {
+				return numPair, explode
+			}
+		}
+
+	}
+
+	// Try and explode left
+	// Or explode right
+	if numPair.X != nil {
+		ExplodePairs(numPair.X, nested+1, append(parents, numPair))
+	}
+	if numPair.Y != nil {
+		ExplodePairs(numPair.Y, nested+1, append(parents, numPair))
+	}
 
 	return numPair, explode
 }
@@ -184,6 +221,10 @@ type NumberPair struct {
 	X     *NumberPair
 	Y     *NumberPair
 	value int
+}
+
+type NumberPairLinkedList struct {
+	Parent *NumberPair
 }
 
 // Read data from input.txt

@@ -136,24 +136,24 @@ func TestExplodePairs(t *testing.T) {
 		want  *NumberPair
 		want1 bool
 	}{
-		// {
-		// 	name:  "basic Explode - 1",
-		// 	args:  args{CreateNumberPair("[[[[[9,8],1],2],3],4]")},
-		// 	want:  CreateNumberPair("[[[[0,9],2],3],4]"),
-		// 	want1: true,
-		// },
+		{
+			name:  "basic Explode - 1",
+			args:  args{CreateNumberPair("[[[[[9,8],1],2],3],4]")},
+			want:  CreateNumberPair("[[[[0,9],2],3],4]"),
+			want1: true,
+		},
 		// {
 		// 	name:  "basic Explode - 2",
 		// 	args:  args{CreateNumberPair("[7,[6,[5,[4,[3,2]]]]]")},
 		// 	want:  CreateNumberPair("[7,[6,[5,[7,0]]]]"),
 		// 	want1: true,
 		// },
-		{
-			name:  "basic Explode - 3",
-			args:  args{CreateNumberPair("[[6,[5,[4,[3,2]]]],1]")},
-			want:  CreateNumberPair("[[6,[5,[7,0]]],3]"),
-			want1: true,
-		},
+		// {
+		// 	name:  "basic Explode - 3",
+		// 	args:  args{CreateNumberPair("[[6,[5,[4,[3,2]]]],1]")},
+		// 	want:  CreateNumberPair("[[6,[5,[7,0]]],3]"),
+		// 	want1: true,
+		// },
 		// {
 		// 	name:  "basic Explode - 4",
 		// 	args:  args{CreateNumberPair("[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]")},
@@ -169,7 +169,7 @@ func TestExplodePairs(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, got1 := ExplodePairs(tt.args.numPair)
+			got, got1 := ExplodePairs(tt.args.numPair, 0, nil)
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("ExplodePairs() got = %v, want %v", got, tt.want)
 			}
