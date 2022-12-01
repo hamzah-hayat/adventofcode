@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -33,19 +34,54 @@ func main() {
 }
 
 func PartOne(filename string) string {
-	input := readInput(filename)
+	input := readInputInt(filename)
 
-	num := strconv.Itoa(len(input))
+	var elfCal []int
 
-	return num
+	sum := 0
+	for _, v := range input {
+		if v == 0 {
+			elfCal = append(elfCal, sum)
+			sum = 0
+		} else {
+			sum += v
+		}
+	}
+	// Remember to grab last elf!
+	elfCal = append(elfCal, sum)
+
+	largest := 0
+	for _, v := range elfCal {
+		if v > largest {
+			largest = v
+		}
+	}
+
+	return strconv.Itoa(largest)
 }
 
 func PartTwo(filename string) string {
-	input := readInput(filename)
+	input := readInputInt(filename)
 
-	num := strconv.Itoa(len(input))
+	var elfCal []int
 
-	return num
+	sum := 0
+	for _, v := range input {
+		if v == 0 {
+			elfCal = append(elfCal, sum)
+			sum = 0
+		} else {
+			sum += v
+		}
+	}
+	// Remember to grab last elf!
+	elfCal = append(elfCal, sum)
+
+	// sort list and get top three
+	sort.Ints(elfCal)
+	sumTopThree := elfCal[len(elfCal)-1] + elfCal[len(elfCal)-2] + elfCal[len(elfCal)-3]
+
+	return strconv.Itoa(sumTopThree)
 }
 
 // Read data from input.txt
@@ -65,11 +101,11 @@ func readInput(filename string) []string {
 
 // Read data from input.txt
 // Return the string as int
-func readInputInt() []int {
+func readInputInt(filename string) []int {
 
 	var input []int
 
-	f, _ := os.Open("input.txt")
+	f, _ := os.Open(filename + ".txt")
 	scanner := bufio.NewScanner(f)
 
 	for scanner.Scan() {
