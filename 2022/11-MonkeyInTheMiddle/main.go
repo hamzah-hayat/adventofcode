@@ -86,6 +86,11 @@ func PartTwo(filename string) string {
 
 	monkeyList := CreateMonkeyList(input)
 
+	modValue := 1
+	for _, m := range monkeyList {
+		modValue = m.testNum * modValue
+	}
+
 	// Run 20 rounds
 	for i := 0; i < 10000; i++ {
 		// run each monkey in turn
@@ -100,6 +105,8 @@ func PartTwo(filename string) string {
 			for _, item := range monkey.items {
 				// Inspect
 				item = monkey.operation(item)
+				// meme
+				item = item % modValue
 				// Throw
 				nextMonkey := monkey.test(item)
 				monkeyList[nextMonkey].items = append(monkeyList[nextMonkey].items, item)
@@ -145,6 +152,7 @@ type Monkey struct {
 	items        []int
 	operation    func(int) int
 	test         func(int) int
+	testNum      int
 	interactions int
 }
 
@@ -215,6 +223,7 @@ func CreateMonkeyList(input []string) []*Monkey {
 			items:        startingItems,
 			operation:    operation,
 			test:         test,
+			testNum:      testCaseNum,
 			interactions: 0,
 		}
 
