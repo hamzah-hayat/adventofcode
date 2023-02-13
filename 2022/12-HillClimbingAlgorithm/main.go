@@ -25,11 +25,11 @@ func main() {
 	switch *methodP {
 	case "all":
 		fmt.Println("Silver:" + PartOne("input"))
-		fmt.Println("Gold:\n" + PartTwo("input"))
+		fmt.Println("Gold:" + PartTwo("input"))
 	case "p1":
 		fmt.Println("Silver:" + PartOne("input"))
 	case "p2":
-		fmt.Println("Gold:\n" + PartTwo("input"))
+		fmt.Println("Gold:" + PartTwo("input"))
 	}
 }
 
