@@ -105,16 +105,27 @@ func expandGearsRecurse(gear string) []string {
 }
 
 // To low 7405945528484
+// To low 23741531685985
+// Wrong 31837419160301
 func PartTwo(filename string) string {
 	input := readInput(filename)
 
 	possiblePatterns := 0
-	for _, v := range input {
+	for i, v := range input {
 		split := strings.Split(v, " ")
 		gears := split[0]
 		pattern := split[1]
 
-		possiblePatterns += solveGearPatternsPart2(gears, pattern, 5)
+		r := solveGearPatternsPart2R(gears, pattern)
+		l := solveGearPatternsPart2L(gears, pattern)
+
+		if r > l {
+			possiblePatterns += r
+		} else {
+			possiblePatterns += l
+		}
+
+		println(i)
 	}
 
 	num := strconv.Itoa(possiblePatterns)
@@ -133,13 +144,10 @@ func PartTwo(filename string) string {
 // 		pattern := split[1]
 
 // 		p, _ := solveGearPatterns(gears, pattern)
-// 		p2, m := solveGearPatterns(gears+"?"+gears, pattern+","+pattern)
-		
-// 		for _, v := range m {
-// 			println(v)
-// 		}
+// 		p2, _ := solveGearPatterns(gears+"#", pattern)
+// 		p3, _ := solveGearPatterns(gears+".", pattern)
 
-// 		multiplier := p2/p
+// 		multiplier := p2 + p3
 // 		possiblePatterns += p * multiplier * multiplier * multiplier * multiplier
 // 	}
 
@@ -178,25 +186,91 @@ func unfoldGears(input []string, size int) []string {
 	return unfoldedGears
 }
 
-func solveGearPatternsPart2(gears, pattern string, unfolds int) int {
+func solveGearPatternsPart2R(gears, pattern string) int {
 	patterns := 0
 
 	_, firstMatchs := solveGearPatterns(gears, pattern)
 
 	for _, m := range firstMatchs {
-		secondUnfold := unfoldGearWithOrg(gears, m, 2)
+		secondUnfold := unfoldGearWithOrgR(gears, m, 2)
 		split := strings.Split(secondUnfold, " ")
 		gears := split[0]
 		pattern := split[1]
 		_, secondMatchs := solveGearPatterns(gears, pattern)
-		patterns += len(firstMatchs) * len(secondMatchs) * len(secondMatchs) * len(secondMatchs) * len(secondMatchs)
+		for _, m := range secondMatchs {
+			thirdUnfold := unfoldGearWithOrgR(gears, m, 2)
+			split := strings.Split(thirdUnfold, " ")
+			gears := split[0]
+			pattern := split[1]
+			_, thirdMatchs := solveGearPatterns(gears, pattern)
+			for _, m := range thirdMatchs {
+				fourthUnfold := unfoldGearWithOrgR(gears, m, 2)
+				split := strings.Split(fourthUnfold, " ")
+				gears := split[0]
+				pattern := split[1]
+				_, fourtMatchs := solveGearPatterns(gears, pattern)
+				for _, m := range fourtMatchs {
+					fifthUnfold := unfoldGearWithOrgR(gears, m, 2)
+					split := strings.Split(fifthUnfold, " ")
+					gears := split[0]
+					pattern := split[1]
+					_, fifthMatchs := solveGearPatterns(gears, pattern)
+					patterns += len(firstMatchs) * len(secondMatchs) * len(thirdMatchs) * len(fourtMatchs) * len(fifthMatchs)
+					break
+				}
+				break
+			}
+			break
+		}
 		break
 	}
 
 	return patterns
 }
 
-func unfoldGearWithOrg(org string, gear string, size int) string {
+func solveGearPatternsPart2L(gears, pattern string) int {
+	patterns := 0
+
+	_, firstMatchs := solveGearPatterns(gears, pattern)
+
+	for _, m := range firstMatchs {
+		secondUnfold := unfoldGearWithOrgL(gears, m, 2)
+		split := strings.Split(secondUnfold, " ")
+		gears := split[0]
+		pattern := split[1]
+		_, secondMatchs := solveGearPatterns(gears, pattern)
+		for _, m := range secondMatchs {
+			thirdUnfold := unfoldGearWithOrgL(gears, m, 2)
+			split := strings.Split(thirdUnfold, " ")
+			gears := split[0]
+			pattern := split[1]
+			_, thirdMatchs := solveGearPatterns(gears, pattern)
+			for _, m := range thirdMatchs {
+				fourthUnfold := unfoldGearWithOrgL(gears, m, 2)
+				split := strings.Split(fourthUnfold, " ")
+				gears := split[0]
+				pattern := split[1]
+				_, fourtMatchs := solveGearPatterns(gears, pattern)
+				for _, m := range fourtMatchs {
+					fifthUnfold := unfoldGearWithOrgL(gears, m, 2)
+					split := strings.Split(fifthUnfold, " ")
+					gears := split[0]
+					pattern := split[1]
+					_, fifthMatchs := solveGearPatterns(gears, pattern)
+					patterns += len(firstMatchs) * len(secondMatchs) * len(thirdMatchs) * len(fourtMatchs) * len(fifthMatchs)
+					break
+				}
+				break
+			}
+			break
+		}
+		break
+	}
+
+	return patterns
+}
+
+func unfoldGearWithOrgR(org string, gear string, size int) string {
 
 	split := strings.Split(gear, " ")
 
@@ -214,6 +288,26 @@ func unfoldGearWithOrg(org string, gear string, size int) string {
 	}
 
 	return newGears[:len(newGears)-1] + " " + newPattern[:len(newPattern)-1]
+}
+
+func unfoldGearWithOrgL(org string, gear string, size int) string {
+
+	split := strings.Split(gear, " ")
+
+	g := split[0]
+	pattern := split[1]
+
+	// Unfold by copying gears by size (with seperator ?)
+	// Copy pattern by size (with seperator ,)
+	newGears := "?" + g
+	newPattern := "," + pattern
+
+	for i := 1; i < size; i++ {
+		newGears = "?" + org + newGears
+		newPattern = "," + pattern + newPattern
+	}
+
+	return newGears[1:] + " " + newPattern[1:]
 }
 
 // Read data from input.txt
