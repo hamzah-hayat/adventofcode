@@ -34,11 +34,6 @@ func main() {
 	}
 }
 
-type Point struct {
-	x int
-	y int
-}
-
 func PartOne(filename string) string {
 	input := readInput(filename)
 
