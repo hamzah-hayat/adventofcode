@@ -226,7 +226,7 @@ func PartTwo(filename string) string {
 	}
 
 	for _, extraObstacle := range pointsToCheck {
-		markedGrid := make(map[Point]string)
+		guardSet := make(map[Guard]int)
 
 		for p := range grid {
 			delete(grid, p)
@@ -242,11 +242,11 @@ func PartTwo(filename string) string {
 
 		// Run loop until either Guard leaves or we find a loop
 		for {
-			MoveGuardNumberMark(grid, markedGrid, maxX, maxY)
+			MoveGuardNumberMark(grid, guardSet, maxX, maxY)
 			if GuardLeftGrid(grid) {
 				break
 			}
-			if GuardInLoop(markedGrid) {
+			if GuardInLoop(guardSet) {
 				totalLoops++
 				break
 			}
@@ -256,7 +256,7 @@ func PartTwo(filename string) string {
 	return strconv.Itoa(totalLoops)
 }
 
-func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, maxX, maxY int) {
+func MoveGuardNumberMark(grid map[Point]string, guardSet map[Guard]int, maxX, maxY int) {
 	// Find Guard
 	currentX := 0
 	currentY := 0
@@ -269,20 +269,20 @@ func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, max
 		}
 	}
 
+	// Mark current position
+	_, exists := guardSet[Guard{currentX, currentY, guardDirection}]
+	if !exists {
+		guardSet[Guard{currentX, currentY, guardDirection}] = 1
+	} else {
+		guardSet[Guard{currentX, currentY, guardDirection}] = 2
+		return // We've already been here
+	}
+
 	// Move
 	switch guardDirection {
 	case "^":
 		// OOB check
 		for {
-			// Mark current position
-			val, exists := markedGrid[Point{currentX, currentY}]
-			if exists {
-				num, _ := strconv.Atoi(val)
-				num++
-				markedGrid[Point{currentX, currentY}] = strconv.Itoa(num)
-			} else {
-				markedGrid[Point{currentX, currentY}] = "1"
-			}
 
 			if currentY-1 < 0 {
 				grid[Point{currentX, currentY}] = "."
@@ -301,15 +301,6 @@ func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, max
 		}
 	case ">":
 		for {
-			// Mark current position
-			val, exists := markedGrid[Point{currentX, currentY}]
-			if exists {
-				num, _ := strconv.Atoi(val)
-				num++
-				markedGrid[Point{currentX, currentY}] = strconv.Itoa(num)
-			} else {
-				markedGrid[Point{currentX, currentY}] = "1"
-			}
 			if currentX+1 > maxX {
 				grid[Point{currentX, currentY}] = "."
 				break
@@ -326,15 +317,6 @@ func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, max
 		}
 	case "v":
 		for {
-			// Mark current position
-			val, exists := markedGrid[Point{currentX, currentY}]
-			if exists {
-				num, _ := strconv.Atoi(val)
-				num++
-				markedGrid[Point{currentX, currentY}] = strconv.Itoa(num)
-			} else {
-				markedGrid[Point{currentX, currentY}] = "1"
-			}
 			if currentY+1 > maxY {
 				grid[Point{currentX, currentY}] = "."
 				break
@@ -351,16 +333,6 @@ func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, max
 		}
 	case "<":
 		for {
-			// Mark current position
-			val, exists := markedGrid[Point{currentX, currentY}]
-			if exists {
-				num, _ := strconv.Atoi(val)
-				num++
-				markedGrid[Point{currentX, currentY}] = strconv.Itoa(num)
-			} else {
-				markedGrid[Point{currentX, currentY}] = "1"
-			}
-
 			if currentX-1 < 0 {
 				grid[Point{currentX, currentY}] = "."
 				break
@@ -378,13 +350,19 @@ func MoveGuardNumberMark(grid map[Point]string, markedGrid map[Point]string, max
 	}
 }
 
-func GuardInLoop(grid map[Point]string) bool {
-	for _, v := range grid {
-		if v == "10" {
+func GuardInLoop(guardSet map[Guard]int) bool {
+	for _, v := range guardSet {
+		if v == 2 {
 			return true
 		}
 	}
 	return false
+}
+
+type Guard struct {
+	x         int
+	y         int
+	direction string
 }
 
 // Read data from input.txt
