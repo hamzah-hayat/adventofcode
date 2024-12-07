@@ -40,14 +40,14 @@ func PartOne(filename string) string {
 	total := 0
 
 	for _, v := range input {
-		total += SolveEquation(v)
+		total += SolveEquation(v, []string{"+", "*"})
 	}
 
 	return strconv.Itoa(total)
 }
 
 // Find all possible solves of this equation
-func SolveEquation(v string) int {
+func SolveEquation(v string, symbols []string) int {
 	total := 0
 	// Input
 	target := strings.Split(v, ":")[0]
@@ -60,7 +60,7 @@ func SolveEquation(v string) int {
 	}
 
 	// Work out all possible combinations
-	permutations := iterium.Product([]string{"+", "*","||"}, len(numbersNums)-1)
+	permutations := iterium.Product(symbols, len(numbersNums)-1)
 	permSlice, _ := permutations.Slice()
 
 	for _, perm := range permSlice {
@@ -93,7 +93,7 @@ func PartTwo(filename string) string {
 	total := 0
 
 	for _, v := range input {
-		total += SolveEquation(v)
+		total += SolveEquation(v, []string{"+", "*", "||"})
 	}
 
 	return strconv.Itoa(total)
