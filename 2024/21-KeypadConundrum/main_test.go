@@ -15,7 +15,7 @@ func TestSilver(t *testing.T) {
 
 func TestGold(t *testing.T) {
 	value := PartTwo("example")
-	expected := "389179"
+	expected := "154115708116294"
 
 	if value != expected {
 		t.Error("Got " + value + " expected " + expected)
