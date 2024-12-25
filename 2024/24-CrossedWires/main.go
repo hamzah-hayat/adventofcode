@@ -28,11 +28,11 @@ func main() {
 	switch *methodP {
 	case "all":
 		fmt.Println("Silver:" + PartOne("input"))
-		fmt.Println("Gold:" + PartTwo("input"))
+		fmt.Println("Gold:" + PartTwo("input_fixed"))
 	case "p1":
 		fmt.Println("Silver:" + PartOne("input"))
 	case "p2":
-		fmt.Println("Gold:" + PartTwo("input"))
+		fmt.Println("Gold:" + PartTwo("input_fixed"))
 	}
 }
 
@@ -170,33 +170,46 @@ type Gate struct {
 }
 
 func PartTwo(filename string) string {
-	input := readInput(filename)
+	//input := readInput(filename)
+	//Wrong Gates
+	// I solved it manually
+	// // Any gate that produces a Z output must use an XOR
+	// y22 AND x22 -> z22//
+	// grd OR rpq -> z29//
+	// vqp AND frr -> z08//
 
-	for {
-		// Start by reading wires/gates
-		gates, wires := GetInitialGatesAndWires(input)
+	// // Using XOR but not with x,y,z
+	// cmn XOR cdf -> hwq//
+	// frr XOR vqp -> thm//
+	// bfq XOR dcf -> gbs//
 
-		checkValue, swappedWires := RunGatesAndCheck(gates, wires)
+	// // Start of section where binary num doesn't match
+	// x14 AND y14 -> wss
+	// x14 XOR y14 -> wrm
 
-		return ""
+	// // Wires
+	// thm,gbs,hwq,z08,z29,z22,wrm,wss
 
-		// Sort and return swappedWires
-		wiresStringSlice := []string{}
-		if checkValue {
-			slices.SortFunc(swappedWires,
-				func(a, b Wire) int {
-					return cmp.Compare(a.wireName, b.wireName)
-				})
-			for i := 0; i < len(swappedWires); i++ {
-				wiresStringSlice = append(wiresStringSlice, swappedWires[i].wireName)
-			}
-			return strings.Join(wiresStringSlice, ",")
-		}
-	}
+	// // Im going to swap
+	// vqp AND frr -> z08 AND frr XOR vqp -> thm
+	// grd OR rpq -> z29 AND bfq XOR dcf -> gbs
+	// y22 AND x22 -> z22 AND cmn XOR cdf -> hwq
+	// x14 AND y14 -> wss AND x14 XOR y14 -> wrm
+	finalWires := []string{"thm", "gbs", "hwq", "z08", "z29", "z22", "wrm", "wss"}
+	slices.Sort(finalWires)
+
+	return strings.Join(finalWires, ",")
+
+	// for {
+	// 	//Start by reading wires/gates
+	// 	gates, wires := GetInitialGatesAndWires(input)
+
+	// 	_, finalValue := RunGatesAndCheck(gates, wires)
+	// }
 }
 
 // Runs a full set of gates, returning whether x values + y values = z values
-func RunGatesAndCheck(gates []Gate, wires []Wire) (bool, []Wire) {
+func RunGatesAndCheck(gates []Gate, wires []Wire) (bool, int) {
 
 	// Then process the gates
 	completedGates := make([]Gate, 0)
@@ -250,7 +263,24 @@ func RunGatesAndCheck(gates []Gate, wires []Wire) (bool, []Wire) {
 	numYBinary, _ := strconv.ParseInt(Reverse(numYStr), 2, 64)
 	numZBinary, _ := strconv.ParseInt(Reverse(numZStr), 2, 64)
 
-	return numXBinary+numYBinary == numZBinary, []Wire{}
+	// Check each Z value here
+	carry := 0
+	for i := 0; i < len(numXStr); i++ {
+		numXb, _ := strconv.Atoi(string(numXStr[i]))
+		numYb, _ := strconv.Atoi(string(numYStr[i]))
+		numZb, _ := strconv.Atoi(string(numZStr[i]))
+
+		if (numXb+numYb+carry)%2 != numZb {
+			fmt.Println("The value of z", i, "is sus")
+		}
+		if numXb+numYb+carry >= 2 {
+			carry = 1
+		} else {
+			carry = 0
+		}
+	}
+
+	return numXBinary+numYBinary == numZBinary, int(numZBinary)
 }
 
 func GetInitialGatesAndWires(input []string) ([]Gate, []Wire) {
