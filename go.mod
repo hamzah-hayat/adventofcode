@@ -1,6 +1,6 @@
 module github.com/hamzah-hayat/adventofcode
 
-go 1.21
+go 1.24.11
 
 require github.com/mowshon/iterium v1.0.0
 
